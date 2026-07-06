@@ -217,22 +217,49 @@
 class Component extends DCLogic {
   state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], tick: 0 };
 
-  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1' };
-  PASS = 'msf2026';
+  SB_URL = 'https://aibtkpeqlnequnyqbbei.supabase.co';
+  SB_KEY = 'sb_publishable_ORRjJPB2oC7RtCMqbYYWjg_PIroC4n8';
+  PASS = 'MSF-Admin-2026!';
 
-  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
-  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes) }); }
+  async sbGet(table, params = '') {
+    try {
+      const r = await fetch(`${this.SB_URL}/rest/v1/${table}${params}`, {
+        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}` }
+      });
+      return r.ok ? r.json() : [];
+    } catch(e) { return []; }
+  }
+
+  async sbPatch(table, filter, body) {
+    try {
+      await fetch(`${this.SB_URL}/rest/v1/${table}?${filter}`, {
+        method: 'PATCH',
+        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } catch(e) {}
+  }
+
+  async load() {
+    const [clients, quotes] = await Promise.all([
+      this.sbGet('clientes', '?order=created_at.desc'),
+      this.sbGet('presupuestos', '?order=fecha.desc')
+    ]);
+    this.setState({ clients: clients || [], quotes: quotes || [] });
+  }
 
   componentDidMount() {
-    if (localStorage.getItem(this.LS.admin) === '1') this.setState({ authed: true });
-    this.load();
+    if (localStorage.getItem('msf_admin_v2') === '1') {
+      this.setState({ authed: true });
+      this.load();
+    }
   }
 
   doLogin = () => {
     const e = document.getElementById('adminPass');
     const v = e ? e.value : '';
     if (v === this.PASS) {
-      localStorage.setItem(this.LS.admin, '1');
+      localStorage.setItem('msf_admin_v2', '1');
       this.setState({ authed: true, loginError: '' });
       this.load();
     } else {
@@ -242,15 +269,15 @@ class Component extends DCLogic {
 
   onPassKey = (e) => { if (e.key === 'Enter') this.doLogin(); };
 
-  doLogout = () => { localStorage.removeItem(this.LS.admin); this.setState({ authed: false }); };
+  doLogout = () => { localStorage.removeItem('msf_admin_v2'); this.setState({ authed: false }); };
 
   refresh = () => { this.load(); };
 
   onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
 
-  setStatus(id, estado) {
-    const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
+  async setStatus(id, estado) {
+    await this.sbPatch('presupuestos', `id=eq.${id}`, { estado });
+    const quotes = (this.state.quotes || []).map(q => q.id === id ? { ...q, estado } : q);
     this.setState({ quotes });
   }
 
@@ -259,33 +286,18 @@ class Component extends DCLogic {
   estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
 
   clientName(q, clients) {
-    if (q.clientId) {
-      const c = clients.find(x => x.id === q.clientId);
+    if (q.client_id) {
+      const c = clients.find(x => x.id === q.client_id);
       if (c) return { nombre: c.nombre, contacto: c.email };
     }
     return { nombre: q.nombre || 'Consulta web', contacto: q.email || '—' };
   }
 
   seedDemo = () => {
-    const now = Date.now();
-    const day = 86400000;
-    const clients = [
-      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString() },
-      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString() },
-      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString() },
-    ];
-    const quotes = [
-      { id: 'dq1', clientId: 'demo1', fecha: new Date(now - 8 * day).toISOString(), tipo: 'Pedido', estado: 'Cerrado', total: 184500, items: [{ name: 'DURLOCK 12.5MM', qty: 6, price: 21000 }, { name: 'MONTANTE 70×35', qty: 18, price: 3200 }] },
-      { id: 'dq2', clientId: 'demo2', fecha: new Date(now - 5 * day).toISOString(), tipo: 'Pedido', estado: 'Cotizado', total: 96000, items: [{ name: 'TYVEK', qty: 2, price: 28000 }, { name: 'LANA DE VIDRIO 50MM', qty: 2, price: 18000 }] },
-      { id: 'dq3', clientId: 'demo3', fecha: new Date(now - 2 * day).toISOString(), tipo: 'Pedido', estado: 'Pendiente', total: 64000, items: [{ name: 'OSB 11MM', qty: 2, price: 32000 }] },
-      { id: 'dq4', clientId: 'demo2', fecha: new Date(now - 1 * day).toISOString(), tipo: 'Consulta', estado: 'Pendiente', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', email: 'laura@lfarq.com', tel: '11 5566 7788', mensaje: 'Necesito cotizar cielorraso suspendido para 80 m², ¿tienen stock de perfiles?' },
-    ];
-    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
-    this.setState({ clients, quotes });
+    alert('Los datos demo ya no aplican. Los datos reales vienen de Supabase.');
   };
 
-  renderVals() {
+    renderVals() {
     const { authed, loginError, tab, search, clients, quotes } = this.state;
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
@@ -325,7 +337,7 @@ class Component extends DCLogic {
       empresa: c.empresa || '—',
       email: c.email,
       tel: c.tel || '—',
-      pedidos: quotes.filter(q => q.clientId === c.id).length,
+      pedidos: quotes.filter(q => q.client_id === c.id).length,
     }));
 
     return {
