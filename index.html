@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;family=Open+Sans:wght@300;400;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: 'Open Sans', sans-serif; font-weight: 400; background: #fff; color: #222; line-height: 1.6; }
+  a { text-decoration: none; color: inherit; }
+  img { max-width: 100%; display: block; }
+  .msf-prod-tabs::-webkit-scrollbar { display: none; }
+  .msf-sistemas > div, .msf-obra-cell { transition: transform .4s ease; }
+  .msf-obra-cell:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+  .msf-obra-cell:nth-child(2) { grid-column: 2 / span 2; grid-row: 1; }
+  .msf-obra-cell:nth-child(3) { grid-column: 2; grid-row: 2; }
+  .msf-obra-cell:nth-child(4) { grid-column: 3; grid-row: 2; }
+  @media (max-width: 1180px) {
+    .msf-nav { display: none !important; }
+  }
+  @media (max-width: 1024px) {
+    .msf-intro { grid-template-columns: 1fr !important; }
+    .msf-introgrid { display: none !important; }
+    .msf-contacto { grid-template-columns: 1fr !important; }
+    .msf-sistemas { grid-template-columns: 1fr 1fr !important; }
+  }
+  @media (max-width: 900px) {
+    .msf-sistemas { grid-template-columns: 1fr !important; }
+    .msf-obras { grid-template-columns: 1fr 1fr !important; grid-template-rows: auto !important; height: auto !important; }
+    .msf-obra-cell { grid-column: auto !important; grid-row: auto !important; height: 200px; }
+    .msf-stats { grid-template-columns: 1fr 1fr !important; }
+    .msf-herostats { position: static !important; margin-top: 36px; }
+    .msf-cats { grid-template-columns: 1fr 1fr !important; }
+    .msf-formrow { grid-template-columns: 1fr !important; }
+  }
+</style>
+</helmet>
+
+<div style="font-family:'Open Sans',sans-serif;color:#222;background:#fff;">
+
+  <!-- TOP BAR -->
+  <div style="background:#0a0a0a;padding:8px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-clock" style="color:#C8102E;font-size:13px;"></i> Local: Lun–Vie 8:00 – 14:30 hs</div>
+      <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-brand-whatsapp" style="color:#C8102E;font-size:13px;"></i> WhatsApp hasta las 20:00 hs</div>
+      <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-map-pin" style="color:#C8102E;font-size:13px;"></i> Hurlingham, GBA Oeste</div>
+    </div>
+    <div style="display:flex;gap:14px;">
+      <a href="#" aria-label="Instagram" style="color:rgba(255,255,255,.45);font-size:16px;" style-hover="color:#C8102E;"><i class="ti ti-brand-instagram"></i></a>
+      <a href="#" aria-label="Facebook" style="color:rgba(255,255,255,.45);font-size:16px;" style-hover="color:#C8102E;"><i class="ti ti-brand-facebook"></i></a>
+      <a href="#" aria-label="WhatsApp" style="color:rgba(255,255,255,.45);font-size:16px;" style-hover="color:#C8102E;" onClick="{{ openWA }}"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </div>
+
+  <!-- HEADER / NAV -->
+  <header style="background:#fff;box-shadow:0 2px 0 #C8102E, 0 3px 14px rgba(0,0,0,.08);position:sticky;top:0;z-index:300;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:80px;">
+      <div style="display:flex;align-items:center;flex-shrink:0;">
+        <div style="width:56px;height:56px;background:#C8102E;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;">
+          <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:1px;line-height:1;">MSF</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:7px;color:rgba(255,255,255,.75);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;">Materiales</div>
+        </div>
+        <div style="padding-left:14px;border-left:3px solid #C8102E;margin-left:14px;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:#0a0a0a;letter-spacing:.06em;text-transform:uppercase;line-height:1.1;">MSF Materiales</div>
+          <div style="font-size:11px;color:#6b6b6b;font-weight:300;letter-spacing:.04em;margin-top:2px;">Steel Frame · Construcción en Seco</div>
+        </div>
+      </div>
+
+      <nav style="display:flex;height:80px;align-items:center;" class="msf-nav">
+        <div style="position:relative;height:100%;display:flex;align-items:center;"><a href="#" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;border-bottom:3px solid transparent;" style-hover="color:#C8102E;border-bottom:3px solid #C8102E;">INICIO</a></div>
+        <div style="position:relative;height:100%;display:flex;align-items:center;"><a href="#nosotros" onClick="{{ goNosotros }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;border-bottom:3px solid transparent;" style-hover="color:#C8102E;border-bottom:3px solid #C8102E;">EMPRESA</a></div>
+        <div style="position:relative;height:100%;display:flex;align-items:center;"><a href="#productos" onClick="{{ goProductos }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;gap:5px;border-bottom:3px solid transparent;" style-hover="color:#C8102E;border-bottom:3px solid #C8102E;">PRODUCTOS <i class="ti ti-chevron-down" style="font-size:11px;"></i></a></div>
+        <div style="position:relative;height:100%;display:flex;align-items:center;"><a href="#porquemsf" onClick="{{ goCalidad }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;border-bottom:3px solid transparent;" style-hover="color:#C8102E;border-bottom:3px solid #C8102E;">CALIDAD</a></div>
+        <div style="position:relative;height:100%;display:flex;align-items:center;"><a href="#contacto" onClick="{{ goContacto }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.08em;text-transform:uppercase;padding:0 18px;height:100%;display:flex;align-items:center;border-bottom:3px solid transparent;" style-hover="color:#C8102E;border-bottom:3px solid #C8102E;">CONTACTO</a></div>
+      </nav>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-left:20px;">
+        <sc-if value="{{ notLogged }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ openAuth }}" style="background:#fff;color:#0a0a0a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:9px 16px;border:1.5px solid #0a0a0a;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:7px;" style-hover="background:#0a0a0a;color:#fff;"><i class="ti ti-user"></i> Ingresar</button>
+        </sc-if>
+        <sc-if value="{{ isLogged }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ openAccount }}" style="background:#fff;color:#0a0a0a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:9px 16px;border:1.5px solid #C8102E;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:7px;" style-hover="background:#C8102E;color:#fff;"><i class="ti ti-user-check" style="color:#C8102E;"></i> {{ userName }}</button>
+        </sc-if>
+        <button onClick="{{ openWA }}" style="background:#25D366;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:10px 18px;border:none;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:7px;" style-hover="opacity:.88;"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
+        <button onClick="{{ goContacto }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:10px 18px;border:none;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Presupuesto</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="msfHero" style="position:relative;background:#0a0a0a;overflow:hidden;min-height:88vh;display:flex;align-items:center;">
+    <div style="position:absolute;inset:0;z-index:0;">
+      <video id="msfV1" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/3209828/free-video-3209828.jpg?w=1280" style="width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity 1.2s ease;position:absolute;inset:0;">
+        <source src="https://videos.pexels.com/video-files/3209828/3209828-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      </video>
+      <video id="msfV2" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/6473923/free-video-6473923.jpg?w=1280" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;position:absolute;inset:0;">
+        <source src="https://videos.pexels.com/video-files/6473923/6473923-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      </video>
+      <div style="position:absolute;inset:0;background:linear-gradient(100deg, rgba(10,10,10,.9) 0%, rgba(10,10,10,.6) 45%, rgba(10,10,10,.12) 100%);z-index:1;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(0deg, rgba(10,10,10,.55) 0%, rgba(10,10,10,0) 30%);z-index:1;"></div>
+    </div>
+
+    <div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:#C8102E;z-index:5;"></div>
+    <div id="msfProgress" style="position:absolute;bottom:0;left:0;height:3px;width:0;background:#C8102E;z-index:10;"></div>
+
+    <div style="position:absolute;bottom:24px;left:60px;display:flex;gap:8px;z-index:10;">
+      <div id="msfDot0" onClick="{{ goSlide0 }}" style="width:48px;height:3px;background:#C8102E;cursor:pointer;transition:background .3s,width .3s;"></div>
+      <div id="msfDot1" onClick="{{ goSlide1 }}" style="width:28px;height:3px;background:rgba(255,255,255,.3);cursor:pointer;transition:background .3s,width .3s;"></div>
+    </div>
+
+    <div style="position:relative;z-index:2;padding:80px 60px;max-width:720px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+        <div style="width:48px;height:3px;background:#C8102E;"></div>
+        <span style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.18em;text-transform:uppercase;">Especialistas en Steel Frame · Zona oeste GBA</span>
+      </div>
+      <h1 style="font-family:'Montserrat',sans-serif;font-size:clamp(40px,5.2vw,68px);font-weight:800;color:#fff;line-height:1.02;text-transform:uppercase;letter-spacing:-1px;margin:0 0 24px;">Trayectoria,<br>stock permanente<br>y <span style="color: rgb(200, 16, 46);">compromiso.</span></h1>
+      <p style="font-size:16px;color:rgba(255,255,255,.6);line-height:1.75;font-weight:300;margin:0 0 40px;max-width:560px;">MSF Materiales Steel Frame provee perfiles galvanizados, placas, membrana y tornillería para la industria de la construcción en seco en zona oeste del GBA. Arquitectos, instaladores y empresas constructoras confían en nuestro stock y atención.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <button onClick="{{ goProductos }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:15px 32px;border:none;cursor:pointer;letter-spacing:.07em;text-transform:uppercase;" style-hover="background:#9e0c23;">Ver catálogo</button>
+        <button onClick="{{ goContacto }}" style="background:transparent;color:rgba(255,255,255,.85);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;padding:15px 32px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;" style-hover="border-color:rgba(255,255,255,.7);">Pedir presupuesto</button>
+      </div>
+    </div>
+
+    <div style="position:absolute;right:0;bottom:0;display:flex;" class="msf-herostats">
+      <div style="padding:22px 30px;text-align:center;background:rgba(200,16,46,.88);">
+        <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">+15</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:10px;color:rgba(255,255,255,.78);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;">Años</div>
+      </div>
+      <div style="padding:22px 30px;text-align:center;background:rgba(200,16,46,.68);border-left:1px solid rgba(255,255,255,.15);">
+        <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">8–20</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:10px;color:rgba(255,255,255,.78);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;">Hs WA</div>
+      </div>
+      <div style="padding:22px 30px;text-align:center;background:rgba(200,16,46,.48);border-left:1px solid rgba(255,255,255,.15);">
+        <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">GBA</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:10px;color:rgba(255,255,255,.78);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;">Zona oeste</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRANJA -->
+  <div style="background:#C8102E;display:flex;overflow:hidden;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.18);"><i class="ti ti-truck" style="font-size:16px;"></i> Envíos zona GBA</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.18);"><i class="ti ti-star" style="font-size:16px;"></i> Stock garantizado</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.18);"><i class="ti ti-credit-card" style="font-size:16px;"></i> MercadoPago · Transferencia</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.18);"><i class="ti ti-shield-check" style="font-size:16px;"></i> Materiales certificados</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;border-right:1px solid rgba(255,255,255,.18);"><i class="ti ti-users" style="font-size:16px;"></i> Arquitectos · Constructoras</div>
+  </div>
+
+  <!-- INTRO EMPRESA -->
+  <section id="msfNosotros" style="display:grid;grid-template-columns:1fr 1fr;background:#1a1a1a;" class="msf-intro">
+    <div style="padding:64px 56px;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="width:36px;height:3px;background:#C8102E;flex-shrink:0;"></span>Quiénes somos</div>
+      <h2 style="font-family:'Montserrat',sans-serif;font-size:32px;font-weight:800;color:#fff;text-transform:uppercase;line-height:1.1;margin:0 0 20px;">Especialistas en<br>construcción en seco</h2>
+      <p style="font-size:14px;color:rgba(255,255,255,.58);line-height:1.8;font-weight:300;margin:0 0 14px;">MSF Materiales Steel Frame es una ferretería especializada en el sistema constructivo steel frame ubicada en Hurlingham, zona oeste del GBA. Trabajamos con arquitectos, instaladores y empresas constructoras que necesitan stock seguro, precios claros y atención que no para cuando cierra el local.</p>
+      <p style="font-size:14px;color:rgba(255,255,255,.58);line-height:1.8;font-weight:300;margin:0 0 14px;">No somos un corralón genérico. Conocemos el rubro, tenemos el material y respondemos rápido. Nuestra atención se extiende hasta las 20:00 hs vía WhatsApp para que ningún pedido se pierda por el horario.</p>
+      <div onClick="{{ goContacto }}" style="display:inline-flex;align-items:center;gap:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#C8102E;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #C8102E;padding-bottom:2px;margin-top:10px;cursor:pointer;" style-hover="opacity:.7;">Ver más sobre la empresa <i class="ti ti-arrow-right" style="font-size:13px;"></i></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;" class="msf-introgrid">
+      <div style="aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.05);font-size:52px;color:rgba(255,255,255,.08);"><i class="ti ti-building-warehouse"></i></div>
+      <div style="aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.05);font-size:52px;color:rgba(255,255,255,.08);"><i class="ti ti-ruler-measure"></i></div>
+      <div style="aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.05);font-size:52px;color:rgba(255,255,255,.08);"><i class="ti ti-square"></i></div>
+      <div style="aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;border:.5px solid rgba(255,255,255,.05);font-size:52px;color:rgba(255,255,255,.08);"><i class="ti ti-tool"></i></div>
+    </div>
+  </section>
+
+  <!-- CATEGORÍAS GRANDES -->
+  <section style="background:#fff;padding:64px 40px;">
+    <div style="text-align:center;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;">Catálogo</div>
+    </div>
+    <h2 style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#0a0a0a;text-transform:uppercase;text-align:center;margin:0 0 8px;">Procesamos, comercializamos y distribuimos<br>materiales para construcción en seco.</h2>
+    <p style="font-size:15px;color:#6b6b6b;text-align:center;margin:0 auto 48px;font-weight:300;">Desarrollamos soluciones para arquitectos, constructoras e instaladores de steel frame en zona oeste del GBA.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #e0e0e0;" class="msf-cats">
+      <sc-for list="{{ catCards }}" as="cat" hint-placeholder-count="6">
+        <div onClick="{{ cat.onClick }}" style="border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;padding:40px 32px;position:relative;overflow:hidden;cursor:pointer;background:#fff;" style-hover="background:#f5f5f5;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:48px;font-weight:800;color:rgba(0,0,0,.05);line-height:1;margin-bottom:10px;">{{ cat.num }}</div>
+          <div style="font-size:36px;color:#e0e0e0;margin-bottom:12px;"><i class="ti {{ cat.icon }}"></i></div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">{{ cat.title }}</div>
+          <div style="font-size:13px;color:#6b6b6b;line-height:1.6;font-weight:300;">{{ cat.desc }}</div>
+          <div style="margin-top:16px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;">Ver productos <i class="ti ti-arrow-right"></i></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- STOCK STATEMENT -->
+  <section style="background:#0a0a0a;padding:56px 40px;text-align:center;position:relative;overflow:hidden;">
+    <h2 style="position:relative;font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:-.3px;margin:0 0 14px;">Tenemos el mayor stock disponible<br>para la construcción en seco de zona oeste</h2>
+    <p style="position:relative;font-size:15px;color:rgba(255,255,255,.55);font-weight:300;max-width:620px;margin:0 auto 36px;line-height:1.75;">Perfiles galvanizados, Durlock, OSB, membrana Tyvek y tornillería siempre disponibles. Sin esperas, sin excusas. Si lo necesitás hoy, lo tenemos hoy.</p>
+    <button onClick="{{ goProductos }}" style="position:relative;background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:15px 36px;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;" style-hover="background:#9e0c23;">Ver catálogo completo</button>
+  </section>
+
+  <!-- SISTEMAS -->
+  <section id="msfSistemas" style="padding:80px 40px;background:#fff;">
+    <div style="max-width:1280px;margin:0 auto;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:40px;">
+        <div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:12px;"><span style="width:36px;height:3px;background:#C8102E;flex-shrink:0;"></span>Soluciones</div>
+          <h2 style="font-family:'Montserrat',sans-serif;font-size:clamp(28px,3.6vw,42px);font-weight:800;color:#0a0a0a;text-transform:uppercase;line-height:1.04;letter-spacing:-.5px;margin:0;">Sistemas constructivos<br>en seco, completos.</h2>
+        </div>
+        <p style="font-size:14px;color:#6b6b6b;font-weight:300;line-height:1.7;max-width:340px;margin:0;">No vendemos materiales sueltos: te damos el sistema completo con el material indicado para cada parte de la obra.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;" class="msf-sistemas">
+        <sc-for list="{{ sistemas }}" as="s" hint-placeholder-count="4">
+          <div onClick="{{ s.onClick }}" style="background:#0a0a0a;cursor:pointer;display:flex;flex-direction:column;" style-hover="transform:translateY(-4px);">
+            <div style="height:200px;position:relative;overflow:hidden;">
+              <img src="{{ s.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:.88;">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.1) 0%,rgba(10,10,10,.75) 100%);"></div>
+              <div style="position:absolute;top:14px;left:14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#fff;letter-spacing:.12em;text-transform:uppercase;background:#C8102E;padding:4px 10px;">{{ s.tag }}</div>
+              <div style="position:absolute;bottom:14px;left:16px;right:16px;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;color:#fff;text-transform:uppercase;line-height:1.1;letter-spacing:.01em;">{{ s.title }}</div>
+            </div>
+            <div style="padding:18px 18px 22px;display:flex;flex-direction:column;flex:1;">
+              <p style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;font-weight:300;margin:0 0 16px;">{{ s.desc }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;margin-top:auto;">
+                <sc-for list="{{ s.specs }}" as="sp" hint-placeholder-count="3">
+                  <span style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.04em;text-transform:uppercase;border:1px solid rgba(255,255,255,.18);padding:4px 9px;">{{ sp }}</span>
+                </sc-for>
+              </div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;">Pedir asesoramiento <i class="ti ti-arrow-right"></i></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <section id="msfProductos" style="padding:64px 40px;background:#fff;">
+    <div style="margin-bottom:36px;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><span style="width:36px;height:3px;background:#C8102E;flex-shrink:0;"></span>Productos</div>
+      <div style="font-family:'Montserrat',sans-serif;font-size:26px;font-weight:800;color:#0a0a0a;text-transform:uppercase;line-height:1.1;">Nuestro catálogo</div>
+      <div style="font-size:14px;color:#6b6b6b;font-weight:300;margin-top:4px;">Steel frame y construcción en seco. Todo en stock permanente.</div>
+    </div>
+    <div class="msf-prod-tabs" style="display:flex;border-bottom:2px solid #e0e0e0;margin-bottom:28px;overflow-x:auto;">
+      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="5">
+        <div onClick="{{ tab.onClick }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px 22px;cursor:pointer;margin-bottom:-2px;white-space:nowrap;flex-shrink:0;color:{{ tab.color }};border-bottom:3px solid {{ tab.border }};">{{ tab.name }}</div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));border:1px solid #e0e0e0;">
+      <sc-for list="{{ products }}" as="p" hint-placeholder-count="4">
+        <div style="border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;background:#fff;position:relative;" style-hover="box-shadow:0 0 0 2px #C8102E inset;z-index:1;">
+          <div style="background:#1a1a1a;height:150px;border-bottom:1px solid #e0e0e0;position:relative;overflow:hidden;">
+            <img src="{{ p.image }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:.92;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.35) 100%);"></div>
+            <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:0;left:0;background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;padding:5px 12px;letter-spacing:.07em;text-transform:uppercase;">{{ p.badge }}</span></sc-if>
+          </div>
+          <div style="padding:16px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#C8102E;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">Steel Frame</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px;line-height:1.2;">{{ p.name }}</div>
+            <div style="font-size:12px;color:#6b6b6b;margin-bottom:12px;">{{ p.spec }}</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;color:#0a0a0a;margin-bottom:13px;">{{ p.priceFmt }}</div>
+            <div style="display:flex;">
+              <button onClick="{{ p.onAdd }}" style="flex:1;background:#0a0a0a;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:9px 6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#C8102E;"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> Agregar</button>
+              <button onClick="{{ p.onWA }}" style="background:#25D366;color:#fff;border:none;padding:9px 12px;cursor:pointer;font-size:15px;display:flex;align-items:center;" style-hover="opacity:.85;"><i class="ti ti-brand-whatsapp"></i></button>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- POR QUÉ -->
+  <section id="msfPorque" style="background:#f5f5f5;padding:64px 40px;">
+    <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-bottom:8px;">Por qué elegirnos</div>
+    <h2 style="font-family:'Montserrat',sans-serif;font-size:26px;font-weight:800;color:#0a0a0a;text-transform:uppercase;text-align:center;margin:0 0 48px;">¿Por qué elegirnos?</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));border:1px solid #e0e0e0;" class="msf-porque">
+      <div style="background:#fff;padding:36px 28px;border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;text-align:center;" class="msf-porque-card">
+        <div style="width:72px;height:72px;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;"><i class="ti ti-boxes" style="font-size:30px;color:#C8102E;"></i></div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Stock permanente</div>
+        <div style="font-size:13px;color:#6b6b6b;line-height:1.65;font-weight:300;">Perfiles, Durlock, OSB, membrana y tornillería siempre disponibles en Hurlingham, sin esperas.</div>
+      </div>
+      <div style="background:#fff;padding:36px 28px;border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;text-align:center;" class="msf-porque-card">
+        <div style="width:72px;height:72px;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;"><i class="ti ti-headset" style="font-size:30px;color:#C8102E;"></i></div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Crecimiento continuo</div>
+        <div style="font-size:13px;color:#6b6b6b;line-height:1.65;font-weight:300;">Atención por WhatsApp hasta las 20 hs. Aunque el local cierre, seguimos respondiendo pedidos y consultas.</div>
+      </div>
+      <div style="background:#fff;padding:36px 28px;border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;text-align:center;" class="msf-porque-card">
+        <div style="width:72px;height:72px;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;"><i class="ti ti-user-check" style="font-size:30px;color:#C8102E;"></i></div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Líderes en el rubro</div>
+        <div style="font-size:13px;color:#6b6b6b;line-height:1.65;font-weight:300;">Especialistas en steel frame y construcción en seco. Conocemos cada detalle del sistema y del material.</div>
+      </div>
+      <div style="background:#fff;padding:36px 28px;border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;text-align:center;" class="msf-porque-card">
+        <div style="width:72px;height:72px;border:2px solid #e0e0e0;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;"><i class="ti ti-truck" style="font-size:30px;color:#C8102E;"></i></div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Servicio ágil y eficiente</div>
+        <div style="font-size:13px;color:#6b6b6b;line-height:1.65;font-weight:300;">Coordinamos entregas para obras en toda la zona oeste del Gran Buenos Aires con respuesta inmediata.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALIDAD STRIP -->
+  <section style="background:#1a1a1a;display:flex;align-items:center;justify-content:space-between;padding:36px 56px;gap:32px;flex-wrap:wrap;">
+    <div>
+      <h3 style="font-family:'Montserrat',sans-serif;font-size:20px;font-weight:800;color:#fff;text-transform:uppercase;margin:0 0 6px;">Sistema de atención y calidad garantizada</h3>
+      <p style="font-size:14px;color:rgba(255,255,255,.5);font-weight:300;max-width:520px;line-height:1.6;margin:0;">MSF opera con procesos claros de cotización, despacho y seguimiento post-venta. Arquitectos e instaladores de zona oeste nos eligen por la consistencia de nuestro servicio y la confiabilidad de nuestro stock.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;border-left:3px solid #C8102E;padding-left:20px;flex-shrink:0;">
+      <div style="font-size:40px;color:#C8102E;"><i class="ti ti-award"></i></div>
+      <div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#fff;letter-spacing:.08em;text-transform:uppercase;">Materiales certificados</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px;">Perfiles y placas con trazabilidad</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBRAS / PROYECTOS -->
+  <section id="msfObras" style="padding:80px 40px;background:#fff;">
+    <div style="max-width:1280px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:44px;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;">Obras</div>
+        <h2 style="font-family:'Montserrat',sans-serif;font-size:clamp(26px,3.4vw,40px);font-weight:800;color:#0a0a0a;text-transform:uppercase;line-height:1.05;letter-spacing:-.5px;margin:0;">Materiales que ya están<br>en obra en zona oeste</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;height:520px;" class="msf-obras">
+        <sc-for list="{{ projects }}" as="o" hint-placeholder-count="4">
+          <div style="position:relative;overflow:hidden;background:#1a1a1a;" class="msf-obra-cell">
+            <img src="{{ o.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .6s ease;" style-hover="transform:scale(1.06);">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,0) 45%,rgba(10,10,10,.82) 100%);"></div>
+            <div style="position:absolute;bottom:18px;left:20px;right:20px;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:#fff;text-transform:uppercase;line-height:1.1;">{{ o.title }}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:300;display:flex;align-items:center;gap:5px;margin-top:3px;"><i class="ti ti-map-pin" style="color:#C8102E;font-size:13px;"></i> {{ o.place }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e0e0e0;border:1px solid #e0e0e0;margin-top:48px;" class="msf-stats">
+        <div style="background:#fff;padding:32px 20px;text-align:center;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">+15</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;">Años en el rubro</div>
+        </div>
+        <div style="background:#fff;padding:32px 20px;text-align:center;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">100%</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;">Stock garantizado</div>
+        </div>
+        <div style="background:#fff;padding:32px 20px;text-align:center;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">&lt;2hs</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;">Respuesta a consultas</div>
+        </div>
+        <div style="background:#fff;padding:32px 20px;text-align:center;">
+          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">GBA</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;">Zona oeste</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="msfContacto" style="display:grid;grid-template-columns:1fr 1fr;background:#0a0a0a;min-height:540px;" class="msf-contacto">
+    <div style="padding:64px 56px;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="width:36px;height:3px;background:#C8102E;flex-shrink:0;"></span>Contacto</div>
+      <h2 style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;text-transform:uppercase;margin:0 0 8px;line-height:1.1;">Pedí tu<br>presupuesto</h2>
+      <p style="font-size:14px;color:rgba(255,255,255,.5);font-weight:300;line-height:1.7;margin:0 0 32px;">También podés completar este formulario y nos comunicamos en menos de 2 horas en horario de atención.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;" class="msf-formrow">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;">Nombre</label>
+          <input id="cfNombre" type="text" placeholder="Tu nombre" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:12px 14px;color:#fff;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;">Empresa / Obra</label>
+          <input id="cfEmpresa" type="text" placeholder="Nombre de la obra" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:12px 14px;color:#fff;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;" class="msf-formrow">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;">Email</label>
+          <input id="cfEmail" type="email" placeholder="correo@email.com" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:12px 14px;color:#fff;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;">WhatsApp</label>
+          <input id="cfTel" type="tel" placeholder="11 2345 6789" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:12px 14px;color:#fff;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+        <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;">¿Qué materiales necesitás?</label>
+        <textarea id="cfMsg" rows="3" placeholder="Describí tu pedido: productos, cantidades, medidas..." style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:12px 14px;color:#fff;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;resize:none;" style-focus="border-color:#C8102E;"></textarea>
+      </div>
+      <button onClick="{{ sendForm }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px 32px;border:none;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;width:100%;margin-top:4px;" style-hover="background:#9e0c23;">Enviar consulta</button>
+    </div>
+    <div style="background:#111;display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="padding:56px 48px 32px;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#C8102E;letter-spacing:.15em;text-transform:uppercase;margin-bottom:32px;">Información de contacto</div>
+        <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
+          <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-map-pin"></i></div>
+          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Ubicación</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;"><strong style="color:#fff;font-weight:600;">Hurlingham, GBA Oeste</strong><br>Buenos Aires, Argentina</div></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
+          <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-clock"></i></div>
+          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Horario del local</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;"><strong style="color:#fff;font-weight:600;">Lunes a Viernes: 8:00 – 14:30 hs</strong><br>Sábados: cerrado</div></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
+          <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-brand-whatsapp"></i></div>
+          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">WhatsApp</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;"><strong style="color:#fff;font-weight:600;">Consultas hasta las 20:00 hs</strong><br>Respuesta garantizada</div></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
+          <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-brand-instagram"></i></div>
+          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Instagram</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;">@msf.materiales</div></div>
+        </div>
+      </div>
+      <div style="background:rgba(200,16,46,.1);border-left:4px solid #C8102E;padding:18px 24px;margin:0 48px 48px;">
+        <p style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.65;margin:0;"><strong style="color:#C8102E;">Atención digital extendida:</strong><br>Aunque el local cierre a las 14:30, seguimos respondiendo por WhatsApp y MercadoLibre hasta las 20:00 hs. Ningún pedido se pierde por el horario.</p>
+      </div>
+      <div style="width:100%;height:260px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:14px;font-family:'Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.06);gap:10px;"><i class="ti ti-map-2" style="font-size:24px;color:#C8102E;"></i> Hurlingham · GBA Oeste · Buenos Aires</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#000;border-top:4px solid #C8102E;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:32px 40px;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap;gap:24px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:44px;background:#C8102E;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;">MSF</span></div>
+        <div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.06em;">MSF Materiales Steel Frame</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:300;margin-top:2px;">Hurlingham, Buenos Aires, Argentina</div>
+        </div>
+      </div>
+      <nav style="display:flex;gap:28px;flex-wrap:wrap;">
+        <a href="#" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;" style-hover="color:#C8102E;">Inicio</a>
+        <a href="#nosotros" onClick="{{ goNosotros }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;" style-hover="color:#C8102E;">Empresa</a>
+        <a href="#productos" onClick="{{ goProductos }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;" style-hover="color:#C8102E;">Productos</a>
+        <a href="#porquemsf" onClick="{{ goCalidad }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;" style-hover="color:#C8102E;">Calidad</a>
+        <a href="#contacto" onClick="{{ goContacto }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;" style-hover="color:#C8102E;">Contacto</a>
+      </nav>
+      <div style="display:flex;gap:12px;">
+        <a href="#" aria-label="Instagram" style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:16px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-brand-instagram"></i></a>
+        <a href="#" aria-label="Facebook" style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:16px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-brand-facebook"></i></a>
+        <a href="#" aria-label="WhatsApp" onClick="{{ openWA }}" style="width:34px;height:34px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:16px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-brand-whatsapp"></i></a>
+      </div>
+    </div>
+    <div style="padding:16px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:12px;color:rgba(255,255,255,.25);">© 2026 MSF Materiales Steel Frame · Todos los derechos reservados · <a href="admin.html" style="color:rgba(255,255,255,.3);" style-hover="color:#C8102E;">Panel MSF</a></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.2);">Desarrollado por <a href="#" style="color:rgba(200,16,46,.6);">J55 / OWNEstudioJ55</a></div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1000;align-items:center;justify-content:center;padding:20px;display:{{ authDisplay }};" onClick="{{ closeAuth }}">
+    <div style="background:#fff;width:420px;max-width:100%;" onClick="{{ stop }}">
+      <div style="background:#0a0a0a;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #C8102E;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:38px;height:38px;background:#C8102E;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:#fff;letter-spacing:1px;">MSF</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Portal de clientes</div>
+        </div>
+        <button onClick="{{ closeAuth }}" style="background:none;border:none;color:rgba(255,255,255,.45);font-size:26px;cursor:pointer;line-height:1;" style-hover="color:#fff;">×</button>
+      </div>
+      <div style="display:flex;border-bottom:1px solid #e0e0e0;">
+        <div onClick="{{ setAuthLogin }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ loginTabColor }};border-bottom:3px solid {{ loginTabBorder }};margin-bottom:-1px;">Iniciar sesión</div>
+        <div onClick="{{ setAuthRegister }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ regTabColor }};border-bottom:3px solid {{ regTabBorder }};margin-bottom:-1px;">Crear cuenta</div>
+      </div>
+      <div style="padding:26px 28px;display:flex;flex-direction:column;gap:14px;">
+        <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Nombre y apellido</label>
+            <input id="authNombre" type="text" placeholder="Tu nombre" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Empresa / Obra <span style="color:#bbb;font-weight:400;">(opcional)</span></label>
+            <input id="authEmpresa" type="text" placeholder="Constructora, estudio u obra" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">WhatsApp <span style="color:#bbb;font-weight:400;">(opcional)</span></label>
+            <input id="authTel" type="tel" placeholder="11 2345 6789" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Email</label>
+          <input id="authEmail" type="email" placeholder="correo@email.com" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Contraseña</label>
+          <input id="authPass" type="password" placeholder="••••••••" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+        </div>
+        <sc-if value="{{ hasAuthError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ authError }}</div>
+        </sc-if>
+        <button onClick="{{ submitAuth }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;margin-top:2px;" style-hover="background:#9e0c23;">{{ authCta }}</button>
+        <div style="font-size:11px;color:#aaa;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.5;"><i class="ti ti-lock" style="font-size:12px;"></i> Tus datos quedan guardados de forma segura en MSF.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT DRAWER -->
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:950;justify-content:flex-end;display:{{ accountDisplay }};" onClick="{{ closeAccount }}">
+    <div style="background:#fff;width:420px;max-width:100vw;height:100vh;display:flex;flex-direction:column;overflow-y:auto;" onClick="{{ stop }}">
+      <div style="background:#0a0a0a;padding:24px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #C8102E;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;"><i class="ti ti-user"></i></div>
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.03em;line-height:1.1;">{{ userFull }}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.55);font-weight:300;margin-top:2px;">{{ userEmpresa }}</div>
+          </div>
+        </div>
+        <button onClick="{{ closeAccount }}" style="background:none;border:none;color:rgba(255,255,255,.45);font-size:26px;cursor:pointer;line-height:1;" style-hover="color:#fff;">×</button>
+      </div>
+      <div style="padding:18px 22px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-mail" style="color:#C8102E;font-size:15px;"></i>
+        <span style="font-size:13px;color:#555;">{{ userEmail }}</span>
+      </div>
+      <div style="padding:20px 22px 8px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#0a0a0a;text-transform:uppercase;letter-spacing:.05em;">Mis presupuestos</div>
+        <span style="background:#0a0a0a;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:2px 9px;">{{ quotesCount }}</span>
+      </div>
+      <div style="flex:1;padding:8px 22px 22px;display:flex;flex-direction:column;gap:12px;">
+        <sc-if value="{{ hasQuotes }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ myQuotes }}" as="q" hint-placeholder-count="2">
+            <div style="border:1px solid #e0e0e0;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#0a0a0a;letter-spacing:.05em;text-transform:uppercase;">{{ q.tipo }}</span>
+                  <span style="font-size:11px;color:#999;">{{ q.fecha }}</span>
+                </div>
+                <span style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#fff;background:{{ q.estadoColor }};padding:3px 9px;letter-spacing:.05em;text-transform:uppercase;">{{ q.estado }}</span>
+              </div>
+              <div style="padding:12px 14px;">
+                <div style="font-size:13px;color:#555;line-height:1.5;">{{ q.summary }}</div>
+                <sc-if value="{{ q.hasTotal }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;color:#0a0a0a;margin-top:8px;">{{ q.totalFmt }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ noQuotes }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center;padding:48px 12px;color:#bbb;">
+            <i class="ti ti-file-text" style="font-size:42px;color:#e0e0e0;"></i>
+            <div style="font-size:13.5px;margin-top:12px;line-height:1.6;">Todavía no pediste ningún presupuesto.<br>Agregá productos al carrito y tocá "Pedir presupuesto".</div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="border-top:1px solid #eee;padding:18px 22px;">
+        <button onClick="{{ logout }}" style="background:#fff;color:#0a0a0a;border:1.5px solid #0a0a0a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:12px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.06em;text-transform:uppercase;" style-hover="background:#0a0a0a;color:#fff;"><i class="ti ti-logout"></i> Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#0a0a0a;color:#fff;border-left:4px solid #C8102E;padding:14px 22px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;letter-spacing:.02em;z-index:1100;box-shadow:0 8px 30px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px;max-width:90vw;"><i class="ti ti-circle-check" style="color:#C8102E;font-size:18px;flex-shrink:0;"></i> {{ toast }}</div>
+  </sc-if>
+
+  <!-- CART FAB -->
+  <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ openDrawer }}" style="position:fixed;bottom:28px;right:28px;background:#0a0a0a;color:#fff;display:flex;align-items:center;gap:10px;padding:14px 24px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-left:4px solid #C8102E;box-shadow:0 4px 28px rgba(0,0,0,.4);z-index:800;" style-hover="background:#1a1a1a;">
+      <i class="ti ti-shopping-cart"></i> Mi pedido
+      <span style="background:#C8102E;font-size:11px;padding:2px 8px;">{{ cartCount }}</span>
+    </div>
+  </sc-if>
+
+  <!-- DRAWER -->
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:900;justify-content:flex-end;display:{{ drawerDisplay }};" onClick="{{ closeDrawerOutside }}">
+    <div style="background:#fff;width:380px;max-width:100vw;height:100vh;display:flex;flex-direction:column;overflow-y:auto;" onClick="{{ stop }}">
+      <div style="background:#0a0a0a;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:10px;"><span style="width:4px;height:18px;background:#C8102E;"></span>Mi pedido</div>
+        <button onClick="{{ closeDrawer }}" style="background:none;border:none;color:rgba(255,255,255,.45);font-size:24px;cursor:pointer;line-height:1;" style-hover="color:#fff;">×</button>
+      </div>
+      <div style="flex:1;padding:18px;display:flex;flex-direction:column;gap:10px;">
+        <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ cartItems }}" as="i" hint-placeholder-count="2">
+            <div style="border:1px solid #e0e0e0;">
+              <div style="background:#f5f5f5;padding:10px 14px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#0a0a0a;letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid #e0e0e0;">{{ i.name }}</div>
+              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button onClick="{{ i.onDec }}" style="width:28px;height:28px;background:#f5f5f5;border:1px solid #e0e0e0;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;" style-hover="background:#C8102E;color:#fff;border-color:#C8102E;">−</button>
+                  <span style="font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:#0a0a0a;min-width:20px;text-align:center;">{{ i.qty }}</span>
+                  <button onClick="{{ i.onInc }}" style="width:28px;height:28px;background:#f5f5f5;border:1px solid #e0e0e0;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;" style-hover="background:#C8102E;color:#fff;border-color:#C8102E;">+</button>
+                </div>
+                <span style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:#0a0a0a;">{{ i.lineFmt }}</span>
+                <button onClick="{{ i.onDel }}" style="background:none;border:none;color:#ccc;font-size:22px;cursor:pointer;line-height:1;" style-hover="color:#C8102E;">×</button>
+              </div>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center;padding:56px 0;color:#bbb;font-size:14px;">Todavía no agregaste productos</div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:2px solid #e0e0e0;padding:20px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b6b6b;"><span>Subtotal</span><span>{{ subtotalFmt }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b6b6b;"><span>Envío</span><span>A confirmar</span></div>
+          <div style="display:flex;justify-content:space-between;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;color:#0a0a0a;padding-top:8px;border-top:1px solid #e0e0e0;"><span>Total</span><span>{{ subtotalFmt }}</span></div>
+          <button onClick="{{ saveQuoteFromCart }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:.06em;text-transform:uppercase;" style-hover="background:#9e0c23;"><i class="ti ti-file-text" style="font-size:15px;"></i> Pedir presupuesto</button>
+          <button onClick="{{ payMP }}" style="background:#009ee3;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.06em;text-transform:uppercase;" style-hover="opacity:.88;"><span style="background:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#009ee3;flex-shrink:0;">MP</span> Pagar con MercadoPago</button>
+          <button onClick="{{ sendCartWA }}" style="background:transparent;color:#1a7a3a;border:2px solid #1a7a3a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:11px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:.06em;text-transform:uppercase;" style-hover="background:#1a7a3a;color:#fff;"><i class="ti ti-brand-whatsapp"></i> Pedir por WhatsApp</button>
+          <div style="font-size:11px;color:#aaa;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-lock" style="font-size:12px;"></i> Pago seguro · PCI-DSS · SSL</div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+</div>
+
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0a"></rect>
+    <rect x="430" y="300" width="200" height="200" fill="#C8102E"></rect>
+    <text x="530" y="425" font-family="Montserrat, Arial, sans-serif" font-size="86" font-weight="800" fill="#ffffff" text-anchor="middle">MSF</text>
+    <text x="690" y="395" font-family="Montserrat, Arial, sans-serif" font-size="40" font-weight="700" fill="#ffffff" letter-spacing="2">MATERIALES</text>
+    <text x="690" y="445" font-family="Montserrat, Arial, sans-serif" font-size="26" font-weight="400" fill="#9a9a9a" letter-spacing="3">STEEL FRAME</text>
+  </svg>
+</template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;1136561527&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;heroAutoplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { activeCat: 'perfiles', cart: {}, drawerOpen: false,
+    user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '' };
+
+  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1' };
+
+  get WA() { return (this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, ''); }
+
+  CATS = [
+    { id:'perfiles',    name:'PERFILES' },
+    { id:'placas',      name:'PLACAS' },
+    { id:'membrana',    name:'MEMBRANA' },
+    { id:'tornilleria', name:'TORNILLERÍA' },
+    { id:'aislantes',   name:'AISLANTES' },
+  ];
+
+  CAT_CARDS = [
+    { id:'perfiles',    num:'01', icon:'ti-ruler',     title:'Perfiles galvanizados', desc:'Montantes, soleras y perfiles especiales para estructuras steel frame. Stock permanente en todas las medidas.' },
+    { id:'placas',      num:'02', icon:'ti-square',    title:'Placas y paneles',      desc:'Durlock estándar, resistente a la humedad y OSB estructural. Para cerramiento y revestimiento.' },
+    { id:'membrana',    num:'03', icon:'ti-layers',    title:'Membrana e hidrófuga',  desc:'Tyvek, foil kraft y barreras de vapor. Protección ante la humedad en toda la envolvente.' },
+    { id:'tornilleria', num:'04', icon:'ti-tool',      title:'Tornillería',           desc:'Autoperforantes, wafer head y tornillos especiales para steel frame. Packs por 500 y 1000 unidades.' },
+    { id:'aislantes',   num:'05', icon:'ti-flame-off', title:'Aislantes',             desc:'Lana de vidrio, lana de roca y poliestireno. Aislación térmica y acústica para steel frame.' },
+    { id:'otros',       num:'06', icon:'ti-package',   title:'Accesorios',            desc:'Burletes, selladores, cintas y todo lo necesario para terminar correctamente la construcción en seco.' },
+  ];
+
+  PRODS = {
+    perfiles: [
+      { id:1,  name:'MONTANTE 70×35',  spec:'Galvanizado · 3 mts · C=0.5', price:3200, badge:'Stock' },
+      { id:2,  name:'MONTANTE 100×50', spec:'Galvanizado · 3 mts · C=0.5', price:4800, badge:null },
+      { id:3,  name:'SOLERA 70×25',    spec:'Galvanizada · 3 mts',          price:2100, badge:'Stock' },
+      { id:4,  name:'SOLERA 100×25',   spec:'Galvanizada · 3 mts',          price:2900, badge:null },
+    ],
+    placas: [
+      { id:5,  name:'DURLOCK 9.5MM',   spec:'Standard · 1.20×2.40 m',          price:18500, badge:'Stock' },
+      { id:6,  name:'DURLOCK 12.5MM',  spec:'Standard · 1.20×2.40 m',          price:21000, badge:'Stock' },
+      { id:7,  name:'OSB 11MM',        spec:'Estructural · 1.22×2.44 m',       price:32000, badge:null },
+      { id:8,  name:'PLACA RH',        spec:'Resistente humedad · 1.20×2.40 m', price:26000, badge:null },
+    ],
+    membrana: [
+      { id:9,  name:'TYVEK',            spec:'Hidrófuga · rollo 50m²', price:28000, badge:'Stock' },
+      { id:10, name:'MEMBRANA FOIL',    spec:'Kraft · rollo 50m²',     price:14500, badge:null },
+      { id:11, name:'BARRERA DE VAPOR', spec:'Rollo 50m²',             price:12000, badge:null },
+    ],
+    tornilleria: [
+      { id:12, name:'AUTOPERFORANTE AGUJA', spec:'Pack ×500', price:4200, badge:'Stock' },
+      { id:13, name:'WAFER HEAD 6×25MM',    spec:'Pack ×500', price:3800, badge:null },
+      { id:14, name:'TACO FISCHER 6MM',     spec:'Pack ×100', price:2200, badge:null },
+    ],
+    aislantes: [
+      { id:15, name:'LANA DE VIDRIO 50MM', spec:'Rollo 15m²',       price:18000, badge:'Stock' },
+      { id:16, name:'LANA DE ROCA 40MM',   spec:'Rollo 10m²',       price:22000, badge:null },
+      { id:17, name:'POLIESTIRENO 20MM',   spec:'Placa 1.20×0.60m', price:4500,  badge:null },
+    ],
+  };
+
+  CAT_IMG = {
+    perfiles:    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=70',
+    placas:      'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?auto=format&fit=crop&w=600&q=70',
+    membrana:    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=70',
+    tornilleria: 'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=600&q=70',
+    aislantes:   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=70',
+  };
+
+  SISTEMAS = [
+    { tag:'Sistema 01', title:'Muros y tabiques', img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=72',
+      desc:'Estructura de perfiles galvanizados con placa de roca de yeso. Rápidos, livianos y de gran prestación.', specs:['Perfiles 70/100', 'Durlock 12.5mm', 'Aislación interior'] },
+    { tag:'Sistema 02', title:'Cielorrasos', img:'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=72',
+      desc:'Suspendidos y aplicados, con terminación lisa lista para pintar. Ocultan instalaciones y mejoran la acústica.', specs:['Soleras y montantes', 'Placa estándar / RH', 'Buñas y perfiles'] },
+    { tag:'Sistema 03', title:'Aislación térmica y acústica', img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=72',
+      desc:'Lana de vidrio, lana de roca y membranas para una envolvente eficiente en todas las estaciones.', specs:['Lana 50/40mm', 'Membrana Tyvek', 'Barrera de vapor'] },
+    { tag:'Sistema 04', title:'Fachadas y exteriores', img:'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=900&q=72',
+      desc:'OSB estructural, hidrófuga y placas para exterior. La piel resistente del steel frame.', specs:['OSB 11mm', 'Hidrófuga', 'Placa cementicia'] },
+  ];
+
+  PROJECTS = [
+    { title:'Vivienda unifamiliar', place:'Ituzaingó', img:'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=800&q=72' },
+    { title:'Ampliación en seco', place:'Morón', img:'https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?auto=format&fit=crop&w=800&q=72' },
+    { title:'Local comercial', place:'Hurlingham', img:'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=72' },
+    { title:'Dúplex steel frame', place:'San Miguel', img:'https://images.unsplash.com/photo-1486304873000-235643847519?auto=format&fit=crop&w=800&q=72' },
+  ];
+
+  fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+
+  findProd(id) {
+    for (const arr of Object.values(this.PRODS)) {
+      const p = arr.find(x => x.id === id);
+      if (p) return p;
+    }
+  }
+
+  scrollTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  openWA = () => window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Quiero%20consultar%20sobre%20materiales.`, '_blank');
+
+  openWAprod(name, priceFmt) {
+    window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Consulto%20por%20${encodeURIComponent(name)}%20(${encodeURIComponent(priceFmt)}).`, '_blank');
+  }
+
+  addCart(id) {
+    const p = this.findProd(id);
+    if (!p) return;
+    this.setState(s => {
+      const cart = { ...s.cart };
+      cart[id] = { ...p, qty: (cart[id]?.qty || 0) + 1 };
+      return { cart };
+    });
+  }
+
+  changeQty(id, d) {
+    this.setState(s => {
+      const cart = { ...s.cart };
+      if (!cart[id]) return {};
+      const qty = cart[id].qty + d;
+      if (qty <= 0) delete cart[id];
+      else cart[id] = { ...cart[id], qty };
+      return { cart };
+    });
+  }
+
+  delItem(id) {
+    this.setState(s => {
+      const cart = { ...s.cart };
+      delete cart[id];
+      return { cart };
+    });
+  }
+
+  sendCartWA = () => {
+    const items = Object.values(this.state.cart);
+    if (!items.length) return;
+    const total = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const msg = items.map(i => `${i.name} ×${i.qty}`).join(', ') + `. Total: ${this.fmt(total)}`;
+    window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Pedido:%20${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  payMP = () => alert('Checkout MercadoPago — conectar credenciales reales de MSF en producción.');
+
+  // ---- Base de datos simulada (localStorage) ----
+  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
+  loadClients() { return this.loadJSON(this.LS.clients); }
+  saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); }
+  loadQuotes() { return this.loadJSON(this.LS.quotes); }
+  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); }
+  val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+
+  showToast(msg) {
+    clearTimeout(this._toastT);
+    this.setState({ toast: msg });
+    this._toastT = setTimeout(() => this.setState({ toast: '' }), 4000);
+  }
+
+  restoreSession() {
+    const sid = localStorage.getItem(this.LS.session);
+    if (!sid) return;
+    const c = this.loadClients().find(x => x.id === sid);
+    if (c) this.setState({ user: c, quotes: this.loadQuotes() });
+  }
+
+  startSession(c) {
+    localStorage.setItem(this.LS.session, c.id);
+    this.setState({ user: c, authOpen: false, authError: '', quotes: this.loadQuotes() });
+    this.showToast('¡Hola ' + c.nombre.split(' ')[0] + '! Sesión iniciada.');
+  }
+
+  submitAuth = () => {
+    const mode = this.state.authMode;
+    const email = this.val('authEmail').toLowerCase();
+    const pass = this.val('authPass');
+    if (!email || !pass) { this.setState({ authError: 'Completá email y contraseña.' }); return; }
+    if (mode === 'login') {
+      const c = this.loadClients().find(x => x.email === email && x.pass === pass);
+      if (!c) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
+      this.startSession(c);
+    } else {
+      const nombre = this.val('authNombre');
+      if (!nombre) { this.setState({ authError: 'Ingresá tu nombre.' }); return; }
+      const clients = this.loadClients();
+      if (clients.some(x => x.email === email)) { this.setState({ authError: 'Ese email ya está registrado. Iniciá sesión.' }); return; }
+      const c = { id: 'c' + Date.now(), nombre, empresa: this.val('authEmpresa'), tel: this.val('authTel'), email, pass, createdAt: new Date().toISOString() };
+      clients.push(c); this.saveClients(clients); this.startSession(c);
+    }
+  };
+
+  logout = () => {
+    localStorage.removeItem(this.LS.session);
+    this.setState({ user: null, accountOpen: false });
+    this.showToast('Sesión cerrada.');
+  };
+
+  saveQuoteFromCart = () => {
+    if (!this.state.user) {
+      this.setState({ drawerOpen: false, authOpen: true, authMode: 'login', authError: 'Ingresá o registrate para guardar tu presupuesto.' });
+      return;
+    }
+    const items = Object.values(this.state.cart);
+    if (!items.length) return;
+    const total = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const quotes = this.loadQuotes();
+    quotes.push({ id: 'q' + Date.now(), clientId: this.state.user.id, fecha: new Date().toISOString(), tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) });
+    this.saveQuotes(quotes);
+    this.setState({ quotes, cart: {}, drawerOpen: false, accountOpen: true });
+    this.showToast('Presupuesto enviado. Lo vas a ver en "Mi cuenta".');
+  };
+
+  sendForm = () => {
+    const email = this.val('cfEmail').toLowerCase();
+    const msg = this.val('cfMsg');
+    if (!email || !msg) { this.showToast('Completá email y el detalle de tu pedido.'); return; }
+    const quotes = this.loadQuotes();
+    quotes.push({
+      id: 'q' + Date.now(), clientId: this.state.user ? this.state.user.id : null,
+      fecha: new Date().toISOString(), tipo: 'Consulta', estado: 'Pendiente',
+      nombre: this.val('cfNombre'), empresa: this.val('cfEmpresa'), email, tel: this.val('cfTel'), mensaje: msg,
+    });
+    this.saveQuotes(quotes);
+    this.setState({ quotes });
+    ['cfNombre', 'cfEmpresa', 'cfEmail', 'cfTel', 'cfMsg'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+    this.showToast('¡Consulta enviada! Te respondemos en horario de atención.');
+  };
+
+  componentDidMount() {
+    const ids = ['msfV1', 'msfV2'];
+    this.videos = ids.map(id => document.getElementById(id));
+    this.dots = [0, 1].map(i => document.getElementById('msfDot' + i));
+    this.progress = document.getElementById('msfProgress');
+    this.current = 0;
+    this.DURATION = 8000;
+    this.restoreSession();
+
+    this.videos.forEach((v, i) => {
+      if (!v) return;
+      v.muted = true;
+      v.play().catch(() => {});
+      if (i !== 0) v.pause();
+    });
+
+    if (this.props.heroAutoplay !== false) {
+      this.startProgress();
+      this.timer = setInterval(() => this.goSlide((this.current + 1) % this.videos.length), this.DURATION);
+    }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    clearInterval(this.progTimer);
+  }
+
+  startProgress() {
+    if (!this.progress) return;
+    if (this.progTimer) clearInterval(this.progTimer);
+    let elapsed = 0;
+    const step = 50;
+    this.progress.style.width = '0%';
+    this.progTimer = setInterval(() => {
+      elapsed += step;
+      this.progress.style.width = Math.min((elapsed / this.DURATION) * 100, 100) + '%';
+    }, step);
+  }
+
+  goSlide(idx) {
+    if (idx === this.current || !this.videos) return;
+    const cur = this.videos[this.current];
+    if (cur) { cur.style.opacity = '0'; }
+    if (this.dots[this.current]) { this.dots[this.current].style.background = 'rgba(255,255,255,.3)'; this.dots[this.current].style.width = '28px'; }
+    this.current = idx;
+    const next = this.videos[this.current];
+    if (next) { next.style.opacity = '1'; next.currentTime = 0; next.play().catch(() => {}); }
+    if (this.dots[this.current]) { this.dots[this.current].style.background = '#C8102E'; this.dots[this.current].style.width = '48px'; }
+    this.startProgress();
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.goSlide((this.current + 1) % this.videos.length), this.DURATION);
+  }
+
+  renderVals() {
+    const { activeCat, cart, drawerOpen, user, quotes, authOpen, authMode, authError, accountOpen, toast } = this.state;
+    const myQuotes = (quotes || []).filter(q => user && q.clientId === user.id).slice().reverse();
+    const cartItems = Object.values(cart);
+    const subtotal = cartItems.reduce((a, i) => a + i.price * i.qty, 0);
+    const count = cartItems.reduce((a, i) => a + i.qty, 0);
+
+    return {
+      catCards: this.CAT_CARDS.map(c => ({
+        ...c,
+        onClick: () => this.scrollTo('msfProductos'),
+      })),
+
+      tabs: this.CATS.map(c => ({
+        name: c.name,
+        color: c.id === activeCat ? '#C8102E' : '#6b6b6b',
+        border: c.id === activeCat ? '#C8102E' : 'transparent',
+        onClick: () => this.setState({ activeCat: c.id }),
+      })),
+
+      sistemas: this.SISTEMAS.map(s => ({ ...s, onClick: this.openWA })),
+      projects: this.PROJECTS,
+
+      products: (this.PRODS[activeCat] || []).map(p => ({
+        name: p.name,
+        spec: p.spec,
+        badge: p.badge,
+        image: this.CAT_IMG[activeCat],
+        priceFmt: this.fmt(p.price),
+        onAdd: () => this.addCart(p.id),
+        onWA: () => this.openWAprod(p.name, this.fmt(p.price)),
+      })),
+
+      cartItems: cartItems.map(i => ({
+        name: i.name,
+        qty: i.qty,
+        lineFmt: this.fmt(i.price * i.qty),
+        onInc: () => this.changeQty(i.id, 1),
+        onDec: () => this.changeQty(i.id, -1),
+        onDel: () => this.delItem(i.id),
+      })),
+
+      hasItems: cartItems.length > 0,
+      cartEmpty: cartItems.length === 0,
+      cartCount: count,
+      subtotalFmt: this.fmt(subtotal),
+      drawerDisplay: drawerOpen ? 'flex' : 'none',
+
+      openWA: this.openWA,
+      goNosotros: (e) => { e && e.preventDefault(); this.scrollTo('msfNosotros'); },
+      goProductos: (e) => { e && e.preventDefault(); this.scrollTo('msfProductos'); },
+      goCalidad: (e) => { e && e.preventDefault(); this.scrollTo('msfPorque'); },
+      goContacto: (e) => { e && e.preventDefault(); this.scrollTo('msfContacto'); },
+      goSlide0: () => this.goSlide(0),
+      goSlide1: () => this.goSlide(1),
+      goSlide2: () => this.goSlide(2),
+      openDrawer: () => this.setState({ drawerOpen: true }),
+      closeDrawer: () => this.setState({ drawerOpen: false }),
+      closeDrawerOutside: () => this.setState({ drawerOpen: false }),
+      stop: (e) => e.stopPropagation(),
+      sendCartWA: this.sendCartWA,
+      payMP: this.payMP,
+      sendForm: this.sendForm,
+
+      // Auth / cuenta de cliente
+      isLogged: !!user,
+      notLogged: !user,
+      userName: user ? user.nombre.split(' ')[0] : '',
+      userFull: user ? user.nombre : '',
+      userEmail: user ? user.email : '',
+      userEmpresa: user && user.empresa ? user.empresa : 'Sin empresa / obra',
+      authDisplay: authOpen ? 'flex' : 'none',
+      accountDisplay: accountOpen ? 'flex' : 'none',
+      isRegister: authMode === 'register',
+      isLogin: authMode === 'login',
+      loginTabColor: authMode === 'login' ? '#C8102E' : '#999',
+      loginTabBorder: authMode === 'login' ? '#C8102E' : 'transparent',
+      regTabColor: authMode === 'register' ? '#C8102E' : '#999',
+      regTabBorder: authMode === 'register' ? '#C8102E' : 'transparent',
+      authError: authError,
+      hasAuthError: !!authError,
+      authTitle: authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión',
+      authCta: authMode === 'register' ? 'Crear mi cuenta' : 'Ingresar',
+      toast: toast,
+      hasToast: !!toast,
+      myQuotes: myQuotes.map(q => ({
+        tipo: q.tipo,
+        estado: q.estado,
+        fecha: new Date(q.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        totalFmt: q.total != null ? this.fmt(q.total) : '',
+        hasTotal: q.total != null,
+        summary: q.items ? q.items.map(i => `${i.name} ×${i.qty}`).join('  ·  ') : (q.mensaje || ''),
+        estadoColor: q.estado === 'Pendiente' ? '#C8102E' : '#1a7a3a',
+      })),
+      hasQuotes: myQuotes.length > 0,
+      noQuotes: myQuotes.length === 0,
+      quotesCount: myQuotes.length,
+      openAuth: () => this.setState({ authOpen: true, authMode: 'login', authError: '' }),
+      closeAuth: () => this.setState({ authOpen: false, authError: '' }),
+      setAuthLogin: () => this.setState({ authMode: 'login', authError: '' }),
+      setAuthRegister: () => this.setState({ authMode: 'register', authError: '' }),
+      submitAuth: this.submitAuth,
+      logout: this.logout,
+      openAccount: () => this.setState({ accountOpen: true }),
+      closeAccount: () => this.setState({ accountOpen: false }),
+      saveQuoteFromCart: this.saveQuoteFromCart,
+    };
+  }
+}
+</script>
+</body>
+</html>

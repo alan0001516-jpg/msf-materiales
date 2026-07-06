@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Open Sans', sans-serif; background: #f4f4f5; color: #1a1a1a; }
+  .msf-tbl-wrap::-webkit-scrollbar { height: 8px; }
+  .msf-tbl-wrap::-webkit-scrollbar-thumb { background: #ccc; }
+  @media (max-width: 760px) {
+    .msf-admin-stats { grid-template-columns: 1fr 1fr !important; }
+    .msf-admin-bar { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#f4f4f5;font-family:'Open Sans',sans-serif;">
+
+  <!-- LOGIN GATE -->
+  <sc-if value="{{ notAuthed }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh;background:#0a0a0a;display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div style="background:#fff;width:400px;max-width:100%;border-top:4px solid #C8102E;">
+        <div style="padding:36px 36px 28px;text-align:center;border-bottom:1px solid #eee;">
+          <div style="width:60px;height:60px;background:#C8102E;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 18px;">
+            <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;color:#fff;letter-spacing:1px;line-height:1;">MSF</div>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;">Panel de gestión</div>
+          <div style="font-size:13px;color:#888;font-weight:300;margin-top:4px;">Acceso exclusivo equipo MSF</div>
+        </div>
+        <div style="padding:30px 36px 36px;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Clave de acceso</label>
+            <input id="adminPass" type="password" placeholder="••••••••" onKeyDown="{{ onPassKey }}" style="border:1px solid #d8d8d8;padding:13px 14px;font-family:'Open Sans',sans-serif;font-size:15px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+          <sc-if value="{{ hasLoginError }}" hint-placeholder-val="{{ false }}">
+            <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ loginError }}</div>
+          </sc-if>
+          <button onClick="{{ doLogin }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;" style-hover="background:#9e0c23;">Ingresar al panel</button>
+          <div style="font-size:11px;color:#bbb;text-align:center;line-height:1.5;">Clave de demostración: <strong style="color:#999;">msf2026</strong><br>(cambiala antes de usar en producción)</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- PANEL -->
+  <sc-if value="{{ isAuthed }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <!-- TOPBAR -->
+      <header style="background:#0a0a0a;border-bottom:3px solid #C8102E;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:66px;position:sticky;top:0;z-index:100;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:42px;height:42px;background:#C8102E;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:1px;">MSF</span></div>
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.05em;line-height:1.1;">Panel de gestión</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.45);font-weight:300;">Clientes y presupuestos</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <a href="index.html" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:6px;padding:9px 14px;border:1px solid rgba(255,255,255,.15);" style-hover="color:#fff;border-color:#C8102E;"><i class="ti ti-external-link"></i> Ver sitio</a>
+          <button onClick="{{ refresh }}" style="background:transparent;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:9px 14px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="color:#fff;border-color:#C8102E;"><i class="ti ti-refresh"></i> Actualizar</button>
+          <button onClick="{{ doLogout }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:10px 16px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="background:#9e0c23;"><i class="ti ti-logout"></i> Salir</button>
+        </div>
+      </header>
+
+      <div style="max-width:1240px;margin:0 auto;padding:28px;">
+
+        <!-- STATS -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;" class="msf-admin-stats">
+          <div style="background:#fff;border-left:4px solid #C8102E;padding:22px 24px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;color:#0a0a0a;line-height:1;">{{ statClients }}</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#888;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;">Clientes registrados</div>
+          </div>
+          <div style="background:#fff;border-left:4px solid #C8102E;padding:22px 24px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;color:#0a0a0a;line-height:1;">{{ statPending }}</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#888;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;">Presupuestos pendientes</div>
+          </div>
+          <div style="background:#fff;border-left:4px solid #C8102E;padding:22px 24px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;color:#0a0a0a;line-height:1;">{{ statTotal }}</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#888;letter-spacing:.06em;text-transform:uppercase;margin-top:8px;">Total de solicitudes</div>
+          </div>
+          <div style="background:#0a0a0a;padding:22px 24px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1;">{{ statValue }}</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;margin-top:8px;">Monto en pedidos</div>
+          </div>
+        </div>
+
+        <!-- TABS + SEARCH -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;" class="msf-admin-bar">
+          <div style="display:flex;background:#fff;border:1px solid #e2e2e2;">
+            <div onClick="{{ tabQuotes }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ quotesTabColor }};background:{{ quotesTabBg }};">Presupuestos</div>
+            <div onClick="{{ tabClients }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ clientsTabColor }};background:{{ clientsTabBg }};">Clientes</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e2e2;padding:0 14px;">
+              <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
+              <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
+            </div>
+            <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
+          </div>
+        </div>
+
+        <!-- QUOTES TABLE -->
+        <sc-if value="{{ showQuotes }}" hint-placeholder-val="{{ true }}">
+          <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
+            <sc-if value="{{ hasQuotes }}" hint-placeholder-val="{{ true }}">
+              <table style="width:100%;border-collapse:collapse;min-width:820px;">
+                <thead>
+                  <tr style="background:#0a0a0a;">
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Fecha</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Cliente</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Tipo</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Detalle</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Monto</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ quoteRows }}" as="q" hint-placeholder-count="4">
+                    <tr style="border-bottom:1px solid #eee;" style-hover="background:#fafafa;">
+                      <td style="padding:14px 18px;font-size:13px;color:#888;white-space:nowrap;">{{ q.fecha }}</td>
+                      <td style="padding:14px 18px;">
+                        <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ q.cliente }}</div>
+                        <div style="font-size:12px;color:#999;">{{ q.contacto }}</div>
+                      </td>
+                      <td style="padding:14px 18px;"><span style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ q.tipoColor }};border:1px solid {{ q.tipoColor }};padding:3px 8px;">{{ q.tipo }}</span></td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;max-width:280px;line-height:1.5;">{{ q.detalle }}</td>
+                      <td style="padding:14px 18px;text-align:right;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;white-space:nowrap;">{{ q.montoFmt }}</td>
+                      <td style="padding:14px 18px;">
+                        <select value="{{ q.estado }}" onChange="{{ q.onStatus }}" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:7px 10px;border:2px solid {{ q.estadoColor }};color:{{ q.estadoColor }};background:#fff;cursor:pointer;outline:none;">
+                          <option value="Pendiente">Pendiente</option>
+                          <option value="Cotizado">Cotizado</option>
+                          <option value="Cerrado">Cerrado</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noQuotes }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:70px 20px;color:#bbb;">
+                <i class="ti ti-file-text" style="font-size:48px;color:#e0e0e0;"></i>
+                <div style="font-size:14px;margin-top:14px;line-height:1.6;">No hay presupuestos todavía.<br>Los pedidos que hagan los clientes desde el sitio van a aparecer acá.</div>
+                <button onClick="{{ seedDemo }}" style="margin-top:18px;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 20px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cargar datos de ejemplo</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- CLIENTS TABLE -->
+        <sc-if value="{{ showClients }}" hint-placeholder-val="{{ false }}">
+          <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
+            <sc-if value="{{ hasClients }}" hint-placeholder-val="{{ true }}">
+              <table style="width:100%;border-collapse:collapse;min-width:760px;">
+                <thead>
+                  <tr style="background:#0a0a0a;">
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Cliente</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Empresa / Obra</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Email</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">WhatsApp</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Pedidos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ clientRows }}" as="c" hint-placeholder-count="4">
+                    <tr style="border-bottom:1px solid #eee;" style-hover="background:#fafafa;">
+                      <td style="padding:14px 18px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                          <div style="width:34px;height:34px;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;">{{ c.initial }}</div>
+                          <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ c.nombre }}</div>
+                        </div>
+                      </td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.empresa }}</td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.email }}</td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.tel }}</td>
+                      <td style="padding:14px 18px;text-align:center;"><span style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#fff;background:#C8102E;padding:3px 11px;">{{ c.pedidos }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noClients }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:70px 20px;color:#bbb;">
+                <i class="ti ti-users" style="font-size:48px;color:#e0e0e0;"></i>
+                <div style="font-size:14px;margin-top:14px;line-height:1.6;">No hay clientes registrados todavía.<br>Cuando alguien cree una cuenta en el sitio, va a aparecer acá.</div>
+                <button onClick="{{ seedDemo }}" style="margin-top:18px;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 20px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cargar datos de ejemplo</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:14px;"></i> Datos almacenados localmente en este navegador (prototipo). Para centralizar la base entre dispositivos, conectar un backend.</div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0a"></rect>
+    <rect x="380" y="320" width="180" height="180" fill="#C8102E"></rect>
+    <text x="470" y="438" font-family="Montserrat, Arial, sans-serif" font-size="74" font-weight="800" fill="#ffffff" text-anchor="middle">MSF</text>
+    <text x="620" y="405" font-family="Montserrat, Arial, sans-serif" font-size="42" font-weight="700" fill="#ffffff">PANEL</text>
+    <text x="620" y="455" font-family="Montserrat, Arial, sans-serif" font-size="24" font-weight="400" fill="#9a9a9a">Gestión de clientes</text>
+  </svg>
+</template>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], tick: 0 };
+
+  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1' };
+  PASS = 'msf2026';
+
+  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
+  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes) }); }
+
+  componentDidMount() {
+    if (localStorage.getItem(this.LS.admin) === '1') this.setState({ authed: true });
+    this.load();
+  }
+
+  doLogin = () => {
+    const e = document.getElementById('adminPass');
+    const v = e ? e.value : '';
+    if (v === this.PASS) {
+      localStorage.setItem(this.LS.admin, '1');
+      this.setState({ authed: true, loginError: '' });
+      this.load();
+    } else {
+      this.setState({ loginError: 'Clave incorrecta. Probá de nuevo.' });
+    }
+  };
+
+  onPassKey = (e) => { if (e.key === 'Enter') this.doLogin(); };
+
+  doLogout = () => { localStorage.removeItem(this.LS.admin); this.setState({ authed: false }); };
+
+  refresh = () => { this.load(); };
+
+  onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
+
+  setStatus(id, estado) {
+    const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
+    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
+    this.setState({ quotes });
+  }
+
+  fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+
+  estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
+
+  clientName(q, clients) {
+    if (q.clientId) {
+      const c = clients.find(x => x.id === q.clientId);
+      if (c) return { nombre: c.nombre, contacto: c.email };
+    }
+    return { nombre: q.nombre || 'Consulta web', contacto: q.email || '—' };
+  }
+
+  seedDemo = () => {
+    const now = Date.now();
+    const day = 86400000;
+    const clients = [
+      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString() },
+      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString() },
+      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString() },
+    ];
+    const quotes = [
+      { id: 'dq1', clientId: 'demo1', fecha: new Date(now - 8 * day).toISOString(), tipo: 'Pedido', estado: 'Cerrado', total: 184500, items: [{ name: 'DURLOCK 12.5MM', qty: 6, price: 21000 }, { name: 'MONTANTE 70×35', qty: 18, price: 3200 }] },
+      { id: 'dq2', clientId: 'demo2', fecha: new Date(now - 5 * day).toISOString(), tipo: 'Pedido', estado: 'Cotizado', total: 96000, items: [{ name: 'TYVEK', qty: 2, price: 28000 }, { name: 'LANA DE VIDRIO 50MM', qty: 2, price: 18000 }] },
+      { id: 'dq3', clientId: 'demo3', fecha: new Date(now - 2 * day).toISOString(), tipo: 'Pedido', estado: 'Pendiente', total: 64000, items: [{ name: 'OSB 11MM', qty: 2, price: 32000 }] },
+      { id: 'dq4', clientId: 'demo2', fecha: new Date(now - 1 * day).toISOString(), tipo: 'Consulta', estado: 'Pendiente', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', email: 'laura@lfarq.com', tel: '11 5566 7788', mensaje: 'Necesito cotizar cielorraso suspendido para 80 m², ¿tienen stock de perfiles?' },
+    ];
+    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
+    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
+    this.setState({ clients, quotes });
+  };
+
+  renderVals() {
+    const { authed, loginError, tab, search, clients, quotes } = this.state;
+
+    const pending = quotes.filter(q => q.estado === 'Pendiente').length;
+    const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
+
+    const s = search.trim();
+    const matchQ = (q) => {
+      if (!s) return true;
+      const cn = this.clientName(q, clients);
+      return (cn.nombre + ' ' + cn.contacto + ' ' + (q.estado || '') + ' ' + (q.tipo || '') + ' ' + (q.mensaje || '')).toLowerCase().includes(s);
+    };
+    const matchC = (c) => {
+      if (!s) return true;
+      return (c.nombre + ' ' + (c.empresa || '') + ' ' + c.email + ' ' + (c.tel || '')).toLowerCase().includes(s);
+    };
+
+    const quoteRows = quotes.slice().reverse().filter(matchQ).map(q => {
+      const cn = this.clientName(q, clients);
+      const detalle = q.items ? q.items.map(i => `${i.name} ×${i.qty}`).join(', ') : (q.mensaje || '');
+      return {
+        fecha: new Date(q.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+        cliente: cn.nombre,
+        contacto: cn.contacto,
+        tipo: q.tipo,
+        tipoColor: q.tipo === 'Pedido' ? '#0a0a0a' : '#c47f00',
+        detalle,
+        montoFmt: q.total != null ? this.fmt(q.total) : '—',
+        estado: q.estado,
+        estadoColor: this.estadoColor(q.estado),
+        onStatus: (e) => this.setStatus(q.id, e.target.value),
+      };
+    });
+
+    const clientRows = clients.slice().reverse().filter(matchC).map(c => ({
+      initial: (c.nombre || '?').trim().charAt(0).toUpperCase(),
+      nombre: c.nombre,
+      empresa: c.empresa || '—',
+      email: c.email,
+      tel: c.tel || '—',
+      pedidos: quotes.filter(q => q.clientId === c.id).length,
+    }));
+
+    return {
+      isAuthed: authed,
+      notAuthed: !authed,
+      loginError,
+      hasLoginError: !!loginError,
+      doLogin: this.doLogin,
+      onPassKey: this.onPassKey,
+      doLogout: this.doLogout,
+      refresh: this.refresh,
+      onSearch: this.onSearch,
+      seedDemo: this.seedDemo,
+
+      statClients: clients.length,
+      statPending: pending,
+      statTotal: quotes.length,
+      statValue: this.fmt(value),
+
+      tabQuotes: () => this.setState({ tab: 'quotes' }),
+      tabClients: () => this.setState({ tab: 'clients' }),
+      showQuotes: tab === 'quotes',
+      showClients: tab === 'clients',
+      quotesTabColor: tab === 'quotes' ? '#fff' : '#666',
+      quotesTabBg: tab === 'quotes' ? '#C8102E' : '#fff',
+      clientsTabColor: tab === 'clients' ? '#fff' : '#666',
+      clientsTabBg: tab === 'clients' ? '#C8102E' : '#fff',
+
+      quoteRows,
+      hasQuotes: quoteRows.length > 0,
+      noQuotes: quoteRows.length === 0,
+      clientRows,
+      hasClients: clientRows.length > 0,
+      noClients: clientRows.length === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>
