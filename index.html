@@ -750,12 +750,48 @@ class Component extends DCLogic {
 
   payMP = () => alert('Checkout MercadoPago — conectar credenciales reales de MSF en producción.');
 
-  // ---- Base de datos simulada (localStorage) ----
+  // ---- Base de datos simulada (localStorage) con respaldo diario automático ----
   loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
   loadClients() { return this.loadJSON(this.LS.clients); }
-  saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); }
+  saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); this.autoSnapshot(); }
   loadQuotes() { return this.loadJSON(this.LS.quotes); }
-  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); }
+  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); this.autoSnapshot(); }
+
+  // Guarda una copia fechada de la base (clientes+presupuestos) una vez por día, sin acción del usuario.
+  // Conserva los últimos 14 días. Si la base principal aparece vacía al arrancar, se autorestaura del snapshot más reciente.
+  autoSnapshot() {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = 'msf_snap_' + today;
+    localStorage.setItem(key, JSON.stringify({
+      clients: this.loadJSON(this.LS.clients),
+      quotes: this.loadJSON(this.LS.quotes),
+      settings: (() => { try { return JSON.parse(localStorage.getItem('msf_settings_v1')) || {}; } catch (e) { return {}; } })(),
+      savedAt: new Date().toISOString(),
+    }));
+    // limpiar snapshots viejos (>14 días)
+    Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).forEach(k => {
+      const d = k.replace('msf_snap_', '');
+      if ((Date.now() - new Date(d).getTime()) > 14 * 86400000) localStorage.removeItem(k);
+    });
+  }
+
+  autoRestoreIfEmpty() {
+    const clients = this.loadJSON(this.LS.clients);
+    const quotes = this.loadJSON(this.LS.quotes);
+    if (clients.length > 0 || quotes.length > 0) { this.autoSnapshot(); return; }
+    const snapKeys = Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).sort().reverse();
+    for (const k of snapKeys) {
+      try {
+        const snap = JSON.parse(localStorage.getItem(k));
+        if (snap && ((snap.clients && snap.clients.length) || (snap.quotes && snap.quotes.length))) {
+          localStorage.setItem(this.LS.clients, JSON.stringify(snap.clients || []));
+          localStorage.setItem(this.LS.quotes, JSON.stringify(snap.quotes || []));
+          if (snap.settings) localStorage.setItem('msf_settings_v1', JSON.stringify(snap.settings));
+          return;
+        }
+      } catch (e) {}
+    }
+  }
   val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 
   showToast(msg) {
@@ -841,6 +877,7 @@ class Component extends DCLogic {
     this.progress = document.getElementById('msfProgress');
     this.current = 0;
     this.DURATION = 8000;
+    this.autoRestoreIfEmpty();
     this.restoreSession();
 
     this.videos.forEach((v, i) => {

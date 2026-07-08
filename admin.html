@@ -249,6 +249,29 @@
               <div style="font-size:11.5px;color:#aaa;line-height:1.6;">Recomendado: descargá un respaldo antes de publicar cambios nuevos del sitio, y restauralo después si hace falta.</div>
             </div>
           </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-clock-hour-4" style="color:#C8102E;"></i> Respaldos automáticos diarios</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Se guardan solos, un día tras otro, sin que hagas nada. Se conservan los últimos 14 días.</div>
+            </div>
+            <div style="padding:10px 26px 22px;">
+              <sc-if value="{{ hasSnapshots }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ snapshotRows }}" as="sn" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0f0f0;">
+                    <div>
+                      <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ sn.fecha }}</div>
+                      <div style="font-size:12px;color:#999;">{{ sn.resumen }}</div>
+                    </div>
+                    <button onClick="{{ sn.onRestore }}" style="background:#fff;border:1px solid #0a0a0a;color:#0a0a0a;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:8px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;" style-hover="background:#0a0a0a;color:#fff;">Restaurar</button>
+                  </div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ noSnapshots }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px;color:#aaa;padding:14px 0;">Todavía no hay respaldos automáticos guardados (se crean apenas haya datos en la base).</div>
+              </sc-if>
+            </div>
+          </div>
         </sc-if>
 
         <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:14px;"></i> Datos almacenados localmente en este navegador (prototipo). Para centralizar la base entre dispositivos, conectar un backend.</div>
@@ -270,19 +293,67 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], settings: {}, settingsSaved: false, backupMsg: '', backupOk: true, tick: 0 };
-
   LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1', settings: 'msf_settings_v1' };
   PASS = 'msf2026';
 
+  // Estado inicial leído de forma síncrona (sin esperar a componentDidMount) para que,
+  // si ya había una sesión de admin, la primera pintura ya muestre clientes/presupuestos reales
+  // y nunca una fila en blanco a mitad de camino.
+  state = (() => {
+    const safe = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const authed = localStorage.getItem('msf_admin_session_v1') === '1';
+    return {
+      authed, loginError: '', tab: 'quotes', search: '',
+      clients: authed ? safe('msf_clients_v1', []) : [],
+      quotes: authed ? safe('msf_quotes_v1', []) : [],
+      settings: authed ? safe('msf_settings_v1', {}) : {},
+      settingsSaved: false, backupMsg: '', backupOk: true, tick: 0,
+    };
+  })();
+
   loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
   loadObj(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; } }
-  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes), settings: this.loadObj(this.LS.settings) }); }
+  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes), settings: this.loadObj(this.LS.settings) }); this.autoSnapshotIfNeeded(); }
+
+  // Respaldo diario automático: guarda una copia fechada de la base sin acción del usuario. Conserva 14 días.
+  autoSnapshotIfNeeded() {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = 'msf_snap_' + today;
+    localStorage.setItem(key, JSON.stringify({
+      clients: this.loadJSON(this.LS.clients),
+      quotes: this.loadJSON(this.LS.quotes),
+      settings: this.loadObj(this.LS.settings),
+      savedAt: new Date().toISOString(),
+    }));
+    Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).forEach(k => {
+      const d = k.replace('msf_snap_', '');
+      if ((Date.now() - new Date(d).getTime()) > 14 * 86400000) localStorage.removeItem(k);
+    });
+  }
+
+  listSnapshots() {
+    return Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).sort().reverse();
+  }
+
+  restoreSnapshot(key) {
+    try {
+      const snap = JSON.parse(localStorage.getItem(key));
+      if (!snap) return;
+      localStorage.setItem(this.LS.clients, JSON.stringify(snap.clients || []));
+      localStorage.setItem(this.LS.quotes, JSON.stringify(snap.quotes || []));
+      if (snap.settings) localStorage.setItem(this.LS.settings, JSON.stringify(snap.settings));
+      this.load();
+      this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + key.replace('msf_snap_', '') + '.', backupOk: true });
+      clearTimeout(this._backupT);
+      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
+    } catch (e) {}
+  }
 
   toggleClient(id) {
     const clients = this.loadJSON(this.LS.clients).map(c => c.id === id ? { ...c, activo: c.activo === false ? true : false } : c);
     localStorage.setItem(this.LS.clients, JSON.stringify(clients));
     this.setState({ clients });
+    this.autoSnapshotIfNeeded();
   }
 
   exportBackup = () => {
@@ -338,8 +409,7 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
-    if (localStorage.getItem(this.LS.admin) === '1') this.setState({ authed: true });
-    this.load();
+    if (this.state.authed) this.autoSnapshotIfNeeded();
   }
 
   doLogin = () => {
@@ -366,6 +436,7 @@ class Component extends DCLogic {
     const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
     localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
     this.setState({ quotes });
+    this.autoSnapshotIfNeeded();
   }
 
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
@@ -397,6 +468,7 @@ class Component extends DCLogic {
     localStorage.setItem(this.LS.clients, JSON.stringify(clients));
     localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
     this.setState({ clients, quotes });
+    this.autoSnapshotIfNeeded();
   };
 
   renderVals() {
@@ -490,6 +562,17 @@ class Component extends DCLogic {
       importBackup: this.importBackup,
       backupMsg,
       backupMsgColor: backupOk ? '#1a7a3a' : '#C8102E',
+      snapshotRows: this.listSnapshots().slice(0, 14).map(k => {
+        let snap = {}; try { snap = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) {}
+        const fecha = k.replace('msf_snap_', '');
+        return {
+          fecha: new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }),
+          resumen: `${(snap.clients || []).length} clientes · ${(snap.quotes || []).length} presupuestos`,
+          onRestore: () => this.restoreSnapshot(k),
+        };
+      }),
+      hasSnapshots: this.listSnapshots().length > 0,
+      noSnapshots: this.listSnapshots().length === 0,
 
       quoteRows,
       hasQuotes: quoteRows.length > 0,
