@@ -608,9 +608,13 @@ class Component extends DCLogic {
   state = { activeCat: 'perfiles', cart: {}, drawerOpen: false,
     user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '' };
 
-  // Sesion: solo guardamos el ID en localStorage, datos en Supabase
+  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1' };
 
-  get WA() { return (this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, ''); }
+  get WA() {
+    let stored = '';
+    try { stored = (JSON.parse(localStorage.getItem('msf_settings_v1')) || {}).whatsappNumber || ''; } catch (e) {}
+    return (stored || this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, '');
+  }
 
   CATS = [
     { id:'perfiles',    name:'PERFILES' },
@@ -746,30 +750,12 @@ class Component extends DCLogic {
 
   payMP = () => alert('Checkout MercadoPago — conectar credenciales reales de MSF en producción.');
 
-  // ---- Supabase — base de datos real ----
-  SB_URL = 'https://aibtkpeqlnequnyqbbei.supabase.co';
-  SB_KEY = 'sb_publishable_ORRjJPB2oC7RtCMqbYYWjg_PIroC4n8';
-
-  async sbGet(table, params = '') {
-    try {
-      const r = await fetch(`${this.SB_URL}/rest/v1/${table}${params}`, {
-        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}` }
-      });
-      return r.ok ? r.json() : [];
-    } catch(e) { return []; }
-  }
-
-  async sbPost(table, body) {
-    try {
-      const r = await fetch(`${this.SB_URL}/rest/v1/${table}`, {
-        method: 'POST',
-        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
-        body: JSON.stringify(body)
-      });
-      return r.ok ? r.json() : null;
-    } catch(e) { return null; }
-  }
-
+  // ---- Base de datos simulada (localStorage) ----
+  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
+  loadClients() { return this.loadJSON(this.LS.clients); }
+  saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); }
+  loadQuotes() { return this.loadJSON(this.LS.quotes); }
+  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); }
   val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 
   showToast(msg) {
@@ -778,51 +764,46 @@ class Component extends DCLogic {
     this._toastT = setTimeout(() => this.setState({ toast: '' }), 4000);
   }
 
-  async restoreSession() {
-    const sid = localStorage.getItem('msf_session_v2');
+  restoreSession() {
+    const sid = localStorage.getItem(this.LS.session);
     if (!sid) return;
-    const rows = await this.sbGet('clientes', `?id=eq.${sid}`);
-    if (rows && rows[0]) {
-      const quotes = await this.sbGet('presupuestos', `?client_id=eq.${sid}&order=fecha.desc`);
-      this.setState({ user: rows[0], quotes: quotes || [] });
-    }
+    const c = this.loadClients().find(x => x.id === sid);
+    if (c) this.setState({ user: c, quotes: this.loadQuotes() });
   }
 
-  async startSession(c) {
-    localStorage.setItem('msf_session_v2', c.id);
-    const quotes = await this.sbGet('presupuestos', `?client_id=eq.${c.id}&order=fecha.desc`);
-    this.setState({ user: c, authOpen: false, authError: '', quotes: quotes || [] });
+  startSession(c) {
+    localStorage.setItem(this.LS.session, c.id);
+    this.setState({ user: c, authOpen: false, authError: '', quotes: this.loadQuotes() });
     this.showToast('¡Hola ' + c.nombre.split(' ')[0] + '! Sesión iniciada.');
   }
 
-  submitAuth = async () => {
+  submitAuth = () => {
     const mode = this.state.authMode;
     const email = this.val('authEmail').toLowerCase();
     const pass = this.val('authPass');
     if (!email || !pass) { this.setState({ authError: 'Completá email y contraseña.' }); return; }
     if (mode === 'login') {
-      const rows = await this.sbGet('clientes', `?email=eq.${encodeURIComponent(email)}&pass=eq.${encodeURIComponent(pass)}`);
-      if (!rows || !rows[0]) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
-      this.startSession(rows[0]);
+      const c = this.loadClients().find(x => x.email === email && x.pass === pass);
+      if (!c) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
+      if (c.activo === false) { this.setState({ authError: 'Tu cuenta está dada de baja. Contactanos por WhatsApp para reactivarla.' }); return; }
+      this.startSession(c);
     } else {
       const nombre = this.val('authNombre');
       if (!nombre) { this.setState({ authError: 'Ingresá tu nombre.' }); return; }
-      const exist = await this.sbGet('clientes', `?email=eq.${encodeURIComponent(email)}`);
-      if (exist && exist.length > 0) { this.setState({ authError: 'Ese email ya está registrado. Iniciá sesión.' }); return; }
-      const c = { id: 'c' + Date.now(), nombre, empresa: this.val('authEmpresa'), tel: this.val('authTel'), email, pass };
-      const created = await this.sbPost('clientes', c);
-      if (!created || !created[0]) { this.setState({ authError: 'Error al crear la cuenta. Intentá de nuevo.' }); return; }
-      this.startSession(created[0]);
+      const clients = this.loadClients();
+      if (clients.some(x => x.email === email)) { this.setState({ authError: 'Ese email ya está registrado. Iniciá sesión.' }); return; }
+      const c = { id: 'c' + Date.now(), nombre, empresa: this.val('authEmpresa'), tel: this.val('authTel'), email, pass, createdAt: new Date().toISOString() };
+      clients.push(c); this.saveClients(clients); this.startSession(c);
     }
   };
 
   logout = () => {
-    localStorage.removeItem('msf_session_v2');
+    localStorage.removeItem(this.LS.session);
     this.setState({ user: null, accountOpen: false });
     this.showToast('Sesión cerrada.');
   };
 
-  saveQuoteFromCart = async () => {
+  saveQuoteFromCart = () => {
     if (!this.state.user) {
       this.setState({ drawerOpen: false, authOpen: true, authMode: 'login', authError: 'Ingresá o registrate para guardar tu presupuesto.' });
       return;
@@ -830,19 +811,25 @@ class Component extends DCLogic {
     const items = Object.values(this.state.cart);
     if (!items.length) return;
     const total = items.reduce((a, i) => a + i.price * i.qty, 0);
-    const q = { id: 'q' + Date.now(), client_id: this.state.user.id, tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) };
-    await this.sbPost('presupuestos', q);
-    const quotes = await this.sbGet('presupuestos', `?client_id=eq.${this.state.user.id}&order=fecha.desc`);
-    this.setState({ quotes: quotes || [], cart: {}, drawerOpen: false, accountOpen: true });
+    const quotes = this.loadQuotes();
+    quotes.push({ id: 'q' + Date.now(), clientId: this.state.user.id, fecha: new Date().toISOString(), tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) });
+    this.saveQuotes(quotes);
+    this.setState({ quotes, cart: {}, drawerOpen: false, accountOpen: true });
     this.showToast('Presupuesto enviado. Lo vas a ver en "Mi cuenta".');
   };
 
-  sendForm = async () => {
+  sendForm = () => {
     const email = this.val('cfEmail').toLowerCase();
     const msg = this.val('cfMsg');
     if (!email || !msg) { this.showToast('Completá email y el detalle de tu pedido.'); return; }
-    const q = { id: 'q' + Date.now(), client_id: this.state.user ? this.state.user.id : null, tipo: 'Consulta', estado: 'Pendiente', nombre: this.val('cfNombre'), empresa: this.val('cfEmpresa'), email, tel: this.val('cfTel'), mensaje: msg };
-    await this.sbPost('presupuestos', q);
+    const quotes = this.loadQuotes();
+    quotes.push({
+      id: 'q' + Date.now(), clientId: this.state.user ? this.state.user.id : null,
+      fecha: new Date().toISOString(), tipo: 'Consulta', estado: 'Pendiente',
+      nombre: this.val('cfNombre'), empresa: this.val('cfEmpresa'), email, tel: this.val('cfTel'), mensaje: msg,
+    });
+    this.saveQuotes(quotes);
+    this.setState({ quotes });
     ['cfNombre', 'cfEmpresa', 'cfEmail', 'cfTel', 'cfMsg'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
     this.showToast('¡Consulta enviada! Te respondemos en horario de atención.');
   };

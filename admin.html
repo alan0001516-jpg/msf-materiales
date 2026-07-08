@@ -44,7 +44,7 @@
             <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ loginError }}</div>
           </sc-if>
           <button onClick="{{ doLogin }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;" style-hover="background:#9e0c23;">Ingresar al panel</button>
-          <div style="font-size:11px;color:#bbb;text-align:center;line-height:1.5;">Clave de acceso: <strong style="color:#999;">MSF-Admin-2026!</strong></div>
+          <div style="font-size:11px;color:#bbb;text-align:center;line-height:1.5;">Clave de demostración: <strong style="color:#999;">msf2026</strong><br>(cambiala antes de usar en producción)</div>
         </div>
       </div>
     </div>
@@ -96,14 +96,17 @@
           <div style="display:flex;background:#fff;border:1px solid #e2e2e2;">
             <div onClick="{{ tabQuotes }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ quotesTabColor }};background:{{ quotesTabBg }};">Presupuestos</div>
             <div onClick="{{ tabClients }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ clientsTabColor }};background:{{ clientsTabBg }};">Clientes</div>
+            <div onClick="{{ tabSettings }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ settingsTabColor }};background:{{ settingsTabBg }};">Ajustes</div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e2e2;padding:0 14px;">
-              <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
-              <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
+          <sc-if value="{{ showSearchBar }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e2e2;padding:0 14px;">
+                <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
+                <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
+              </div>
+              <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
             </div>
-            <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
-          </div>
+          </sc-if>
         </div>
 
         <!-- QUOTES TABLE -->
@@ -166,11 +169,13 @@
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Email</th>
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">WhatsApp</th>
                     <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Pedidos</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
                   <sc-for list="{{ clientRows }}" as="c" hint-placeholder-count="4">
-                    <tr style="border-bottom:1px solid #eee;" style-hover="background:#fafafa;">
+                    <tr style="border-bottom:1px solid #eee;opacity:{{ c.rowOpacity }};" style-hover="background:#fafafa;">
                       <td style="padding:14px 18px;">
                         <div style="display:flex;align-items:center;gap:10px;">
                           <div style="width:34px;height:34px;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;">{{ c.initial }}</div>
@@ -181,6 +186,10 @@
                       <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.email }}</td>
                       <td style="padding:14px 18px;font-size:13px;color:#555;">{{ c.tel }}</td>
                       <td style="padding:14px 18px;text-align:center;"><span style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#fff;background:#C8102E;padding:3px 11px;">{{ c.pedidos }}</span></td>
+                      <td style="padding:14px 18px;text-align:center;"><span style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ c.estadoColor }};border:1px solid {{ c.estadoColor }};padding:4px 10px;">{{ c.estadoLabel }}</span></td>
+                      <td style="padding:14px 18px;text-align:center;">
+                        <button onClick="{{ c.onToggle }}" style="background:{{ c.btnBg }};color:{{ c.btnColor }};border:1px solid {{ c.btnBorder }};font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:8px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">{{ c.btnLabel }}</button>
+                      </td>
                     </tr>
                   </sc-for>
                 </tbody>
@@ -193,6 +202,32 @@
                 <button onClick="{{ seedDemo }}" style="margin-top:18px;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 20px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cargar datos de ejemplo</button>
               </div>
             </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- SETTINGS -->
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Ajustes del sitio</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Estos cambios afectan al sitio público en este navegador.</div>
+            </div>
+            <div style="padding:26px;display:flex;flex-direction:column;gap:22px;">
+              <div>
+                <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">WhatsApp de pedidos y presupuestos</label>
+                <div style="font-size:12.5px;color:#999;margin:5px 0 10px;line-height:1.5;">Número al que llegan las consultas, pedidos y el botón flotante de WhatsApp del sitio.</div>
+                <div style="display:flex;gap:10px;">
+                  <input id="settingsWA" type="tel" value="{{ waNumberInput }}" placeholder="54 9 11 2345 6789" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                  <button onClick="{{ saveSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:0 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar</button>
+                </div>
+                <sc-if value="{{ settingsSaved }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12px;color:#1a7a3a;margin-top:8px;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> Guardado. Ya se aplica en el sitio.</div>
+                </sc-if>
+              </div>
+              <div style="border-top:1px solid #eee;padding-top:20px;font-size:11.5px;color:#aaa;line-height:1.6;">
+                Este número reemplaza al de fábrica en el botón de WhatsApp, la ficha de contacto y los mensajes de pedido del sitio.
+              </div>
+            </div>
           </div>
         </sc-if>
 
@@ -215,51 +250,41 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], tick: 0 };
+  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], settings: {}, settingsSaved: false, tick: 0 };
 
-  SB_URL = 'https://aibtkpeqlnequnyqbbei.supabase.co';
-  SB_KEY = 'sb_publishable_ORRjJPB2oC7RtCMqbYYWjg_PIroC4n8';
-  PASS = 'MSF-Admin-2026!';
+  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1', settings: 'msf_settings_v1' };
+  PASS = 'msf2026';
 
-  async sbGet(table, params = '') {
-    try {
-      const r = await fetch(`${this.SB_URL}/rest/v1/${table}${params}`, {
-        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}` }
-      });
-      return r.ok ? r.json() : [];
-    } catch(e) { return []; }
+  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
+  loadObj(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; } }
+  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes), settings: this.loadObj(this.LS.settings) }); }
+
+  toggleClient(id) {
+    const clients = this.loadJSON(this.LS.clients).map(c => c.id === id ? { ...c, activo: c.activo === false ? true : false } : c);
+    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
+    this.setState({ clients });
   }
 
-  async sbPatch(table, filter, body) {
-    try {
-      await fetch(`${this.SB_URL}/rest/v1/${table}?${filter}`, {
-        method: 'PATCH',
-        headers: { apikey: this.SB_KEY, Authorization: `Bearer ${this.SB_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-    } catch(e) {}
-  }
-
-  async load() {
-    const [clients, quotes] = await Promise.all([
-      this.sbGet('clientes', '?order=created_at.desc'),
-      this.sbGet('presupuestos', '?order=fecha.desc')
-    ]);
-    this.setState({ clients: clients || [], quotes: quotes || [] });
-  }
+  saveSettings = () => {
+    const e = document.getElementById('settingsWA');
+    const num = e ? e.value.trim() : '';
+    const settings = { ...this.loadObj(this.LS.settings), whatsappNumber: num };
+    localStorage.setItem(this.LS.settings, JSON.stringify(settings));
+    this.setState({ settings, settingsSaved: true });
+    clearTimeout(this._savedT);
+    this._savedT = setTimeout(() => this.setState({ settingsSaved: false }), 3000);
+  };
 
   componentDidMount() {
-    if (localStorage.getItem('msf_admin_v2') === '1') {
-      this.setState({ authed: true });
-      this.load();
-    }
+    if (localStorage.getItem(this.LS.admin) === '1') this.setState({ authed: true });
+    this.load();
   }
 
   doLogin = () => {
     const e = document.getElementById('adminPass');
     const v = e ? e.value : '';
     if (v === this.PASS) {
-      localStorage.setItem('msf_admin_v2', '1');
+      localStorage.setItem(this.LS.admin, '1');
       this.setState({ authed: true, loginError: '' });
       this.load();
     } else {
@@ -269,15 +294,15 @@ class Component extends DCLogic {
 
   onPassKey = (e) => { if (e.key === 'Enter') this.doLogin(); };
 
-  doLogout = () => { localStorage.removeItem('msf_admin_v2'); this.setState({ authed: false }); };
+  doLogout = () => { localStorage.removeItem(this.LS.admin); this.setState({ authed: false }); };
 
   refresh = () => { this.load(); };
 
   onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
 
-  async setStatus(id, estado) {
-    await this.sbPatch('presupuestos', `id=eq.${id}`, { estado });
-    const quotes = (this.state.quotes || []).map(q => q.id === id ? { ...q, estado } : q);
+  setStatus(id, estado) {
+    const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
+    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
     this.setState({ quotes });
   }
 
@@ -286,19 +311,34 @@ class Component extends DCLogic {
   estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
 
   clientName(q, clients) {
-    if (q.client_id) {
-      const c = clients.find(x => x.id === q.client_id);
+    if (q.clientId) {
+      const c = clients.find(x => x.id === q.clientId);
       if (c) return { nombre: c.nombre, contacto: c.email };
     }
     return { nombre: q.nombre || 'Consulta web', contacto: q.email || '—' };
   }
 
   seedDemo = () => {
-    alert('Los datos demo ya no aplican. Los datos reales vienen de Supabase.');
+    const now = Date.now();
+    const day = 86400000;
+    const clients = [
+      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString() },
+      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString() },
+      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString() },
+    ];
+    const quotes = [
+      { id: 'dq1', clientId: 'demo1', fecha: new Date(now - 8 * day).toISOString(), tipo: 'Pedido', estado: 'Cerrado', total: 184500, items: [{ name: 'DURLOCK 12.5MM', qty: 6, price: 21000 }, { name: 'MONTANTE 70×35', qty: 18, price: 3200 }] },
+      { id: 'dq2', clientId: 'demo2', fecha: new Date(now - 5 * day).toISOString(), tipo: 'Pedido', estado: 'Cotizado', total: 96000, items: [{ name: 'TYVEK', qty: 2, price: 28000 }, { name: 'LANA DE VIDRIO 50MM', qty: 2, price: 18000 }] },
+      { id: 'dq3', clientId: 'demo3', fecha: new Date(now - 2 * day).toISOString(), tipo: 'Pedido', estado: 'Pendiente', total: 64000, items: [{ name: 'OSB 11MM', qty: 2, price: 32000 }] },
+      { id: 'dq4', clientId: 'demo2', fecha: new Date(now - 1 * day).toISOString(), tipo: 'Consulta', estado: 'Pendiente', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', email: 'laura@lfarq.com', tel: '11 5566 7788', mensaje: 'Necesito cotizar cielorraso suspendido para 80 m², ¿tienen stock de perfiles?' },
+    ];
+    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
+    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
+    this.setState({ clients, quotes });
   };
 
-    renderVals() {
-    const { authed, loginError, tab, search, clients, quotes } = this.state;
+  renderVals() {
+    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved } = this.state;
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -331,14 +371,25 @@ class Component extends DCLogic {
       };
     });
 
-    const clientRows = clients.slice().reverse().filter(matchC).map(c => ({
-      initial: (c.nombre || '?').trim().charAt(0).toUpperCase(),
-      nombre: c.nombre,
-      empresa: c.empresa || '—',
-      email: c.email,
-      tel: c.tel || '—',
-      pedidos: quotes.filter(q => q.client_id === c.id).length,
-    }));
+    const clientRows = clients.slice().reverse().filter(matchC).map(c => {
+      const active = c.activo !== false;
+      return {
+        initial: (c.nombre || '?').trim().charAt(0).toUpperCase(),
+        nombre: c.nombre,
+        empresa: c.empresa || '—',
+        email: c.email,
+        tel: c.tel || '—',
+        pedidos: quotes.filter(q => q.clientId === c.id).length,
+        rowOpacity: active ? 1 : 0.5,
+        estadoLabel: active ? 'Alta' : 'Baja',
+        estadoColor: active ? '#1a7a3a' : '#999',
+        btnLabel: active ? 'Dar de baja' : 'Reactivar',
+        btnBg: active ? '#fff' : '#0a0a0a',
+        btnColor: active ? '#C8102E' : '#fff',
+        btnBorder: active ? '#C8102E' : '#0a0a0a',
+        onToggle: () => this.toggleClient(c.id),
+      };
+    });
 
     return {
       isAuthed: authed,
@@ -359,12 +410,20 @@ class Component extends DCLogic {
 
       tabQuotes: () => this.setState({ tab: 'quotes' }),
       tabClients: () => this.setState({ tab: 'clients' }),
+      tabSettings: () => this.setState({ tab: 'settings' }),
       showQuotes: tab === 'quotes',
       showClients: tab === 'clients',
+      showSettings: tab === 'settings',
+      showSearchBar: tab !== 'settings',
       quotesTabColor: tab === 'quotes' ? '#fff' : '#666',
       quotesTabBg: tab === 'quotes' ? '#C8102E' : '#fff',
       clientsTabColor: tab === 'clients' ? '#fff' : '#666',
       clientsTabBg: tab === 'clients' ? '#C8102E' : '#fff',
+      settingsTabColor: tab === 'settings' ? '#fff' : '#666',
+      settingsTabBg: tab === 'settings' ? '#C8102E' : '#fff',
+      waNumberInput: settings.whatsappNumber || '',
+      saveSettings: this.saveSettings,
+      settingsSaved,
 
       quoteRows,
       hasQuotes: quoteRows.length > 0,
