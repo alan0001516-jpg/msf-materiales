@@ -755,16 +755,27 @@ class Component extends DCLogic {
   loadClients() { return this.loadJSON(this.LS.clients); }
   saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); this.autoSnapshot(); }
   loadQuotes() { return this.loadJSON(this.LS.quotes); }
-  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); this.autoSnapshot(); }
+  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); this.archiveQuotes(a); this.autoSnapshot(); }
+
+  archiveQuotes(quotes) {
+    const archive = this.loadJSON('msf_quotes_archive_v1');
+    const byId = {}; archive.forEach(q => byId[q.id] = q);
+    let changed = false;
+    quotes.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; changed = true; } });
+    if (changed) localStorage.setItem('msf_quotes_archive_v1', JSON.stringify(Object.values(byId)));
+  }
 
   // Guarda una copia fechada de la base (clientes+presupuestos) una vez por día, sin acción del usuario.
   // Conserva los últimos 14 días. Si la base principal aparece vacía al arrancar, se autorestaura del snapshot más reciente.
   autoSnapshot() {
+    const clientsNow = this.loadJSON(this.LS.clients);
+    const quotesNow = this.loadJSON(this.LS.quotes);
+    if (clientsNow.length === 0 && quotesNow.length === 0) return;
     const today = new Date().toISOString().slice(0, 10);
     const key = 'msf_snap_' + today;
     localStorage.setItem(key, JSON.stringify({
-      clients: this.loadJSON(this.LS.clients),
-      quotes: this.loadJSON(this.LS.quotes),
+      clients: clientsNow,
+      quotes: quotesNow,
       settings: (() => { try { return JSON.parse(localStorage.getItem('msf_settings_v1')) || {}; } catch (e) { return {}; } })(),
       savedAt: new Date().toISOString(),
     }));

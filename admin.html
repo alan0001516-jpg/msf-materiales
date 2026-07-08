@@ -270,6 +270,23 @@
               <sc-if value="{{ noSnapshots }}" hint-placeholder-val="{{ false }}">
                 <div style="font-size:12.5px;color:#aaa;padding:14px 0;">Todavía no hay respaldos automáticos guardados (se crean apenas haya datos en la base).</div>
               </sc-if>
+              <sc-if value="{{ hasPrerestore }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                  <div style="font-size:12px;color:#999;">¿Restauraste algo por error?</div>
+                  <button onClick="{{ undoLastRestore }}" style="background:#fff;border:1px solid #C8102E;color:#C8102E;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:9px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="background:#C8102E;color:#fff;"><i class="ti ti-arrow-back-up"></i> Deshacer última restauración</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-shield-lock" style="color:#C8102E;"></i> Archivo histórico de pedidos</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Cada pedido que entra queda guardado acá para siempre, aunque después se restaure un respaldo viejo.</div>
+            </div>
+            <div style="padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+              <div style="font-size:13px;color:#555;">Pedidos guardados en el archivo: <strong style="color:#0a0a0a;">{{ archiveCount }}</strong></div>
+              <button onClick="{{ recoverQuotesFromArchive }}" style="background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 16px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:7px;" style-hover="background:#1a1a1a;"><i class="ti ti-refresh-dot"></i> Recuperar pedidos faltantes</button>
             </div>
           </div>
         </sc-if>
@@ -316,12 +333,16 @@ class Component extends DCLogic {
   load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes), settings: this.loadObj(this.LS.settings) }); this.autoSnapshotIfNeeded(); }
 
   // Respaldo diario automático: guarda una copia fechada de la base sin acción del usuario. Conserva 14 días.
+  // Nunca guarda un día "vacío" (evita que después alguien restaure por error una copia sin datos).
   autoSnapshotIfNeeded() {
+    const clients = this.loadJSON(this.LS.clients);
+    const quotes = this.loadJSON(this.LS.quotes);
+    this.archiveQuotes(quotes); // archivo histórico de pedidos, nunca se borra
+    if (clients.length === 0 && quotes.length === 0) return;
     const today = new Date().toISOString().slice(0, 10);
     const key = 'msf_snap_' + today;
     localStorage.setItem(key, JSON.stringify({
-      clients: this.loadJSON(this.LS.clients),
-      quotes: this.loadJSON(this.LS.quotes),
+      clients, quotes,
       settings: this.loadObj(this.LS.settings),
       savedAt: new Date().toISOString(),
     }));
@@ -331,23 +352,65 @@ class Component extends DCLogic {
     });
   }
 
-  listSnapshots() {
-    return Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).sort().reverse();
+  // Archivo histórico de pedidos: se acumula, nunca se borra ni se pisa, aunque se restaure un respaldo viejo.
+  archiveQuotes(quotes) {
+    const archive = this.loadJSON('msf_quotes_archive_v1');
+    const byId = {}; archive.forEach(q => byId[q.id] = q);
+    let changed = false;
+    quotes.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; changed = true; } });
+    if (changed) localStorage.setItem('msf_quotes_archive_v1', JSON.stringify(Object.values(byId)));
   }
+
+  listSnapshots() {
+    return Object.keys(localStorage).filter(k => k.startsWith('msf_snap_') && k !== 'msf_snap_prerestore').sort().reverse();
+  }
+
+  hasPrerestore() { return !!localStorage.getItem('msf_snap_prerestore'); }
 
   restoreSnapshot(key) {
     try {
       const snap = JSON.parse(localStorage.getItem(key));
       if (!snap) return;
+      const fecha = key.replace('msf_snap_', '');
+      const nClients = (snap.clients || []).length, nQuotes = (snap.quotes || []).length;
+      const ok = window.confirm(
+        `¿Restaurar el respaldo del ${fecha}?\n\nVa a reemplazar la base actual (${this.state.clients.length} clientes, ${this.state.quotes.length} pedidos) por esta copia: ${nClients} clientes, ${nQuotes} pedidos.\n\nSe guarda automáticamente una copia de seguridad de lo actual antes de reemplazar, por si hace falta deshacer.`
+      );
+      if (!ok) return;
+      // Copia de seguridad de "justo antes de restaurar", para poder deshacer
+      localStorage.setItem('msf_snap_prerestore', JSON.stringify({
+        clients: this.loadJSON(this.LS.clients),
+        quotes: this.loadJSON(this.LS.quotes),
+        settings: this.loadObj(this.LS.settings),
+        savedAt: new Date().toISOString(),
+      }));
       localStorage.setItem(this.LS.clients, JSON.stringify(snap.clients || []));
       localStorage.setItem(this.LS.quotes, JSON.stringify(snap.quotes || []));
       if (snap.settings) localStorage.setItem(this.LS.settings, JSON.stringify(snap.settings));
       this.load();
-      this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + key.replace('msf_snap_', '') + '.', backupOk: true });
+      this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + fecha + '. (Se guardó una copia de lo anterior por si querés deshacer.)', backupOk: true });
       clearTimeout(this._backupT);
-      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
+      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 6000);
     } catch (e) {}
   }
+
+  undoLastRestore = () => {
+    this.restoreSnapshot('msf_snap_prerestore');
+  };
+
+  recoverQuotesFromArchive = () => {
+    const archive = this.loadJSON('msf_quotes_archive_v1');
+    if (!archive.length) { this.setState({ backupMsg: 'El archivo histórico todavía no tiene pedidos guardados.', backupOk: false }); return; }
+    const current = this.loadJSON(this.LS.quotes);
+    const byId = {}; current.forEach(q => byId[q.id] = q);
+    let added = 0;
+    archive.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; added++; } });
+    const merged = Object.values(byId);
+    localStorage.setItem(this.LS.quotes, JSON.stringify(merged));
+    this.setState({ quotes: merged, backupMsg: added > 0 ? `Se recuperaron ${added} pedido(s) del archivo histórico.` : 'No faltaba ningún pedido: ya estaban todos.', backupOk: true });
+    clearTimeout(this._backupT);
+    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
+  };
 
   toggleClient(id) {
     const clients = this.loadJSON(this.LS.clients).map(c => c.id === id ? { ...c, activo: c.activo === false ? true : false } : c);
@@ -573,6 +636,10 @@ class Component extends DCLogic {
       }),
       hasSnapshots: this.listSnapshots().length > 0,
       noSnapshots: this.listSnapshots().length === 0,
+      hasPrerestore: this.hasPrerestore(),
+      undoLastRestore: this.undoLastRestore,
+      recoverQuotesFromArchive: this.recoverQuotesFromArchive,
+      archiveCount: this.loadJSON('msf_quotes_archive_v1').length,
 
       quoteRows,
       hasQuotes: quoteRows.length > 0,
