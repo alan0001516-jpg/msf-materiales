@@ -229,6 +229,26 @@
               </div>
             </div>
           </div>
+
+          <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
+            <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Respaldo de datos</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Los clientes y presupuestos viven en este navegador. Hacé respaldos seguido.</div>
+            </div>
+            <div style="padding:26px;display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button onClick="{{ exportBackup }}" style="flex:1;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px;" style-hover="background:#1a1a1a;"><i class="ti ti-download"></i> Descargar respaldo (.json)</button>
+                <label style="flex:1;background:#fff;color:#0a0a0a;border:1.5px solid #0a0a0a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px;" style-hover="background:#0a0a0a;color:#fff;">
+                  <i class="ti ti-upload"></i> Restaurar desde archivo
+                  <input type="file" accept="application/json" onChange="{{ importBackup }}" style="display:none;">
+                </label>
+              </div>
+              <sc-if value="{{ backupMsg }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;color:{{ backupMsgColor }};display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> {{ backupMsg }}</div>
+              </sc-if>
+              <div style="font-size:11.5px;color:#aaa;line-height:1.6;">Recomendado: descargá un respaldo antes de publicar cambios nuevos del sitio, y restauralo después si hace falta.</div>
+            </div>
+          </div>
         </sc-if>
 
         <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:14px;"></i> Datos almacenados localmente en este navegador (prototipo). Para centralizar la base entre dispositivos, conectar un backend.</div>
@@ -250,7 +270,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], settings: {}, settingsSaved: false, tick: 0 };
+  state = { authed: false, loginError: '', tab: 'quotes', search: '', clients: [], quotes: [], settings: {}, settingsSaved: false, backupMsg: '', backupOk: true, tick: 0 };
 
   LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1', settings: 'msf_settings_v1' };
   PASS = 'msf2026';
@@ -264,6 +284,48 @@ class Component extends DCLogic {
     localStorage.setItem(this.LS.clients, JSON.stringify(clients));
     this.setState({ clients });
   }
+
+  exportBackup = () => {
+    const data = {
+      clients: this.loadJSON(this.LS.clients),
+      quotes: this.loadJSON(this.LS.quotes),
+      settings: this.loadObj(this.LS.settings),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url; a.download = `msf-respaldo-${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    this.setState({ backupMsg: 'Respaldo descargado.', backupOk: true });
+    clearTimeout(this._backupT);
+    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 4000);
+  };
+
+  importBackup = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!Array.isArray(data.clients) || !Array.isArray(data.quotes)) throw new Error('formato');
+        localStorage.setItem(this.LS.clients, JSON.stringify(data.clients));
+        localStorage.setItem(this.LS.quotes, JSON.stringify(data.quotes));
+        if (data.settings) localStorage.setItem(this.LS.settings, JSON.stringify(data.settings));
+        this.load();
+        this.setState({ backupMsg: `Restaurado: ${data.clients.length} clientes, ${data.quotes.length} presupuestos.`, backupOk: true });
+      } catch (err) {
+        this.setState({ backupMsg: 'El archivo no es un respaldo válido.', backupOk: false });
+      }
+      clearTimeout(this._backupT);
+      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   saveSettings = () => {
     const e = document.getElementById('settingsWA');
@@ -338,7 +400,7 @@ class Component extends DCLogic {
   };
 
   renderVals() {
-    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved } = this.state;
+    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk } = this.state;
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -424,6 +486,10 @@ class Component extends DCLogic {
       waNumberInput: settings.whatsappNumber || '',
       saveSettings: this.saveSettings,
       settingsSaved,
+      exportBackup: this.exportBackup,
+      importBackup: this.importBackup,
+      backupMsg,
+      backupMsgColor: backupOk ? '#1a7a3a' : '#C8102E',
 
       quoteRows,
       hasQuotes: quoteRows.length > 0,
