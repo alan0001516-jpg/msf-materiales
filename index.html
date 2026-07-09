@@ -11,6 +11,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;family=Open+Sans:wght@300;400;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="./firebase-msf.js"></script>
+<script>
+  (function () {
+    window.__msfEmailjsServiceId = 'service_8jhj6ab';
+    window.__msfEmailjsTemplateId = 'template_a0vwu2h';
+    window.__msfEmailjsPublicKey = '7yFiDa-eqAoONQJLs';
+    function init() {
+      if (!window.emailjs || window.__msfEmailjsConfigured) return;
+      window.emailjs.init({ publicKey: window.__msfEmailjsPublicKey });
+      window.__msfEmailjsConfigured = true;
+    }
+    if (window.emailjs) { init(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    s.onload = init;
+    document.head.appendChild(s);
+  })();
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -49,7 +66,7 @@
   <!-- TOP BAR -->
   <div style="background:#0a0a0a;padding:8px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <div style="display:flex;gap:24px;flex-wrap:wrap;">
-      <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-clock" style="color:#C8102E;font-size:13px;"></i> Local: Lun–Vie 8:00 – 14:30 hs</div>
+      <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-clock" style="color:#C8102E;font-size:13px;"></i> Local: Lun–Vie 8:30 – 14:30 hs</div>
       <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-brand-whatsapp" style="color:#C8102E;font-size:13px;"></i> WhatsApp hasta las 20:00 hs</div>
       <div style="color:rgba(255,255,255,.55);font-size:12px;display:flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;letter-spacing:.04em;"><i class="ti ti-map-pin" style="color:#C8102E;font-size:13px;"></i> Hurlingham, GBA Oeste</div>
     </div>
@@ -98,11 +115,14 @@
   <!-- HERO -->
   <section id="msfHero" style="position:relative;background:#0a0a0a;overflow:hidden;min-height:88vh;display:flex;align-items:center;">
     <div style="position:absolute;inset:0;z-index:0;">
-      <video id="msfV1" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/3209828/free-video-3209828.jpg?w=1280" style="width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity 1.2s ease;position:absolute;inset:0;">
-        <source src="https://videos.pexels.com/video-files/3209828/3209828-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      <video id="msfV1" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/34572297/pexels-photo-34572297.jpeg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200" style="width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity 1.2s ease;position:absolute;inset:0;">
+        <source src="https://videos.pexels.com/video-files/34572297/14649280_2560_1440_30fps.mp4" type="video/mp4">
       </video>
       <video id="msfV2" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/6473923/free-video-6473923.jpg?w=1280" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;position:absolute;inset:0;">
         <source src="https://videos.pexels.com/video-files/6473923/6473923-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      </video>
+      <video id="msfV3" muted="" playsinline="" loop="" preload="auto" poster="https://images.pexels.com/videos/4280922/pexels-photo-4280922.jpeg?auto=compress&w=1260&h=750&dpr=1" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s ease;position:absolute;inset:0;">
+        <source src="https://videos.pexels.com/video-files/4280922/4280922-uhd_2560_1440_25fps.mp4" type="video/mp4">
       </video>
       <div style="position:absolute;inset:0;background:linear-gradient(100deg, rgba(10,10,10,.9) 0%, rgba(10,10,10,.6) 45%, rgba(10,10,10,.12) 100%);z-index:1;"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(0deg, rgba(10,10,10,.55) 0%, rgba(10,10,10,0) 30%);z-index:1;"></div>
@@ -114,6 +134,7 @@
     <div style="position:absolute;bottom:24px;left:60px;display:flex;gap:8px;z-index:10;">
       <div id="msfDot0" onClick="{{ goSlide0 }}" style="width:48px;height:3px;background:#C8102E;cursor:pointer;transition:background .3s,width .3s;"></div>
       <div id="msfDot1" onClick="{{ goSlide1 }}" style="width:28px;height:3px;background:rgba(255,255,255,.3);cursor:pointer;transition:background .3s,width .3s;"></div>
+      <div id="msfDot2" onClick="{{ goSlide2 }}" style="width:28px;height:3px;background:rgba(255,255,255,.3);cursor:pointer;transition:background .3s,width .3s;"></div>
     </div>
 
     <div style="position:relative;z-index:2;padding:80px 60px;max-width:720px;">
@@ -131,7 +152,7 @@
 
     <div style="position:absolute;right:0;bottom:0;display:flex;" class="msf-herostats">
       <div style="padding:22px 30px;text-align:center;background:rgba(200,16,46,.88);">
-        <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">+15</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;">+5</div>
         <div style="font-family:'Montserrat',sans-serif;font-size:10px;color:rgba(255,255,255,.78);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;">Años</div>
       </div>
       <div style="padding:22px 30px;text-align:center;background:rgba(200,16,46,.68);border-left:1px solid rgba(255,255,255,.15);">
@@ -331,7 +352,7 @@
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e0e0e0;border:1px solid #e0e0e0;margin-top:48px;" class="msf-stats">
         <div style="background:#fff;padding:32px 20px;text-align:center;">
-          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">+15</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:40px;font-weight:800;color:#0a0a0a;line-height:1;">+5</div>
           <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:8px;">Años en el rubro</div>
         </div>
         <div style="background:#fff;padding:32px 20px;text-align:center;">
@@ -391,7 +412,7 @@
         </div>
         <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
           <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-clock"></i></div>
-          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Horario del local</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;"><strong style="color:#fff;font-weight:600;">Lunes a Viernes: 8:00 – 14:30 hs</strong><br>Sábados: cerrado</div></div>
+          <div><div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Horario del local</div><div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.55;font-weight:300;"><strong style="color:#fff;font-weight:600;">Lunes a Viernes: 8:30 – 14:30 hs</strong><br>Sábados: cerrado</div></div>
         </div>
         <div style="display:flex;gap:16px;margin-bottom:24px;align-items:flex-start;">
           <div style="width:40px;height:40px;background:#C8102E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0;"><i class="ti ti-brand-whatsapp"></i></div>
@@ -449,10 +470,13 @@
         <button onClick="{{ closeAuth }}" style="background:none;border:none;color:rgba(255,255,255,.45);font-size:26px;cursor:pointer;line-height:1;" style-hover="color:#fff;">×</button>
       </div>
       <div style="display:flex;border-bottom:1px solid #e0e0e0;">
-        <div onClick="{{ setAuthLogin }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ loginTabColor }};border-bottom:3px solid {{ loginTabBorder }};margin-bottom:-1px;">Iniciar sesión</div>
-        <div onClick="{{ setAuthRegister }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ regTabColor }};border-bottom:3px solid {{ regTabBorder }};margin-bottom:-1px;">Crear cuenta</div>
+        <sc-if value="{{ showAuthTabs }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ setAuthLogin }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ loginTabColor }};border-bottom:3px solid {{ loginTabBorder }};margin-bottom:-1px;">Iniciar sesión</div>
+          <div onClick="{{ setAuthRegister }}" style="flex:1;text-align:center;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:15px;cursor:pointer;color:{{ regTabColor }};border-bottom:3px solid {{ regTabBorder }};margin-bottom:-1px;">Crear cuenta</div>
+        </sc-if>
       </div>
       <div style="padding:26px 28px;display:flex;flex-direction:column;gap:14px;">
+        <sc-if value="{{ isNormalAuth }}" hint-placeholder-val="{{ true }}">
         <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Nombre y apellido</label>
@@ -475,16 +499,48 @@
           <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Contraseña</label>
           <input id="authPass" type="password" placeholder="••••••••" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
         </div>
+        <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ setAuthForgot }}" style="font-size:12px;color:#999;text-align:right;cursor:pointer;margin-top:-6px;" style-hover="color:#C8102E;">¿Olvidaste tu contraseña?</div>
+        </sc-if>
         <sc-if value="{{ hasAuthError }}" hint-placeholder-val="{{ false }}">
           <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ authError }}</div>
         </sc-if>
         <button onClick="{{ submitAuth }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;margin-top:2px;" style-hover="background:#9e0c23;">{{ authCta }}</button>
         <div style="font-size:11px;color:#aaa;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.5;"><i class="ti ti-lock" style="font-size:12px;"></i> Tus datos quedan guardados de forma segura en MSF.</div>
+        </sc-if>
+
+        <sc-if value="{{ isForgotRequest }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:#666;line-height:1.6;margin-bottom:4px;">Ingresá tu email y te mandamos un código para crear una contraseña nueva.</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Email</label>
+            <input id="forgotEmail" type="email" placeholder="correo@email.com" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+          <sc-if value="{{ hasAuthError }}" hint-placeholder-val="{{ false }}">
+            <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ authError }}</div>
+          </sc-if>
+          <button onClick="{{ sendResetCode }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;margin-top:2px;" style-hover="background:#9e0c23;">{{ forgotCta }}</button>
+          <div onClick="{{ setAuthLogin }}" style="font-size:12px;color:#999;text-align:center;cursor:pointer;" style-hover="color:#C8102E;">Volver a iniciar sesión</div>
+        </sc-if>
+
+        <sc-if value="{{ isForgotReset }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:#666;line-height:1.6;margin-bottom:4px;">Te enviamos un código a <strong>{{ forgotEmailSent }}</strong>. Ingresalo junto con tu nueva contraseña.</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Código recibido</label>
+            <input id="resetCode" type="text" inputmode="numeric" placeholder="123456" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;letter-spacing:.2em;" style-focus="border-color:#C8102E;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Contraseña nueva</label>
+            <input id="resetNewPass" type="password" placeholder="••••••••" style="border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+          </div>
+          <sc-if value="{{ hasAuthError }}" hint-placeholder-val="{{ false }}">
+            <div style="background:rgba(200,16,46,.08);border-left:3px solid #C8102E;color:#9e0c23;font-size:12.5px;padding:10px 12px;">{{ authError }}</div>
+          </sc-if>
+          <button onClick="{{ confirmResetPass }}" style="background:#C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;padding:14px;border:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;margin-top:2px;" style-hover="background:#9e0c23;">Guardar contraseña nueva</button>
+          <div onClick="{{ setAuthForgot }}" style="font-size:12px;color:#999;text-align:center;cursor:pointer;" style-hover="color:#C8102E;">Reenviar código</div>
+        </sc-if>
       </div>
     </div>
   </div>
-
-  <!-- ACCOUNT DRAWER -->
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:950;justify-content:flex-end;display:{{ accountDisplay }};" onClick="{{ closeAccount }}">
     <div style="background:#fff;width:420px;max-width:100vw;height:100vh;display:flex;flex-direction:column;overflow-y:auto;" onClick="{{ stop }}">
       <div style="background:#0a0a0a;padding:24px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #C8102E;">
@@ -604,16 +660,38 @@
     <text x="690" y="445" font-family="Montserrat, Arial, sans-serif" font-size="26" font-weight="400" fill="#9a9a9a" letter-spacing="3">STEEL FRAME</text>
   </svg>
 </template></x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;1136561527&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;heroAutoplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;whatsappNumber&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;1128922323&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;heroAutoplay&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; }
+}">
 class Component extends DCLogic {
   state = { activeCat: 'perfiles', cart: {}, drawerOpen: false,
-    user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '', remoteSettings: {}, dbConnecting: false };
+    user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '', remoteSettings: {}, dbConnecting: false,
+    forgotEmailSent: '' };
 
   LS = { session: 'msf_session_v1' }; // solo guardamos localmente CUÁL es la sesión activa en este navegador
 
   get WA() {
     const remote = (this.state.remoteSettings || {}).whatsappNumber || '';
-    return (remote || this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, '');
+    return (remote || this.props.whatsappNumber || '5491128922323').replace(/[^0-9]/g, '');
+  }
+
+  // Devuelve los números de WhatsApp activos (1 o 2, según lo que esté encendido en el panel de MSF).
+  get activeWANumbers() {
+    const s = this.state.remoteSettings || {};
+    const nums = [];
+    const n1 = (s.whatsappNumber1 || s.whatsappNumber || '').replace(/[^0-9]/g, '');
+    const n2 = (s.whatsappNumber2 || '').replace(/[^0-9]/g, '');
+    if (n1 && s.wa1Active !== false) nums.push(n1);
+    if (n2 && s.wa2Active !== false) nums.push(n2);
+    if (!nums.length) nums.push((this.props.whatsappNumber || '5491128922323').replace(/[^0-9]/g, ''));
+    return nums;
+  }
+
+  openWAText(text) {
+    this.activeWANumbers.forEach((num, i) => {
+      setTimeout(() => window.open(`https://wa.me/${num}?text=${text}`, '_blank'), i * 400);
+    });
   }
 
   CATS = [
@@ -635,31 +713,31 @@ class Component extends DCLogic {
 
   PRODS = {
     perfiles: [
-      { id:1,  name:'MONTANTE 70×35',  spec:'Galvanizado · 3 mts · C=0.5', price:3200, badge:'Stock' },
-      { id:2,  name:'MONTANTE 100×50', spec:'Galvanizado · 3 mts · C=0.5', price:4800, badge:null },
-      { id:3,  name:'SOLERA 70×25',    spec:'Galvanizada · 3 mts',          price:2100, badge:'Stock' },
-      { id:4,  name:'SOLERA 100×25',   spec:'Galvanizada · 3 mts',          price:2900, badge:null },
+      { id:1,  name:'MONTANTE 70×35',  spec:'Galvanizado · 3 mts · Espesor 0.5mm · Alma 70mm', price:3200, badge:'Stock', img:'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=600&q=70' },
+      { id:2,  name:'MONTANTE 100×50', spec:'Galvanizado · 3 mts · Espesor 0.5mm · Alma 100mm', price:4800, badge:null, img:'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=600&q=70' },
+      { id:3,  name:'SOLERA 70×25',    spec:'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price:2100, badge:'Stock', img:'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=600&q=70' },
+      { id:4,  name:'SOLERA 100×25',   spec:'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price:2900, badge:null, img:'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=600&q=70' },
     ],
     placas: [
-      { id:5,  name:'DURLOCK 9.5MM',   spec:'Standard · 1.20×2.40 m',          price:18500, badge:'Stock' },
-      { id:6,  name:'DURLOCK 12.5MM',  spec:'Standard · 1.20×2.40 m',          price:21000, badge:'Stock' },
-      { id:7,  name:'OSB 11MM',        spec:'Estructural · 1.22×2.44 m',       price:32000, badge:null },
-      { id:8,  name:'PLACA RH',        spec:'Resistente humedad · 1.20×2.40 m', price:26000, badge:null },
+      { id:5,  name:'DURLOCK 9.5MM',   spec:'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price:18500, badge:'Stock', img:'https://images.unsplash.com/photo-1768321902331-7d21aa3faf5a?auto=format&fit=crop&w=600&q=70' },
+      { id:6,  name:'DURLOCK 12.5MM',  spec:'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price:21000, badge:'Stock', img:'https://images.unsplash.com/photo-1768321917995-2d992c50854b?auto=format&fit=crop&w=600&q=70' },
+      { id:7,  name:'OSB 11MM',        spec:'Estructural · 1.22×2.44 m · Machihembrado · Exterior', price:32000, badge:null, img:'https://images.unsplash.com/photo-1595514535215-8f0a3e2e5c95?auto=format&fit=crop&w=600&q=70' },
+      { id:8,  name:'PLACA RH',        spec:'Resistente a la humedad · 1.20×2.40 m · Color verde', price:26000, badge:null, img:'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=600&q=70' },
     ],
     membrana: [
-      { id:9,  name:'TYVEK',            spec:'Hidrófuga · rollo 50m²', price:28000, badge:'Stock' },
-      { id:10, name:'MEMBRANA FOIL',    spec:'Kraft · rollo 50m²',     price:14500, badge:null },
-      { id:11, name:'BARRERA DE VAPOR', spec:'Rollo 50m²',             price:12000, badge:null },
+      { id:9,  name:'TYVEK',            spec:'Hidrófuga transpirable · rollo 50m² · Marca Dupont', price:28000, badge:'Stock', img:'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=70' },
+      { id:10, name:'MEMBRANA FOIL',    spec:'Kraft aluminizada · rollo 50m² · Barrera radiante',   price:14500, badge:null, img:'https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&w=600&q=70' },
+      { id:11, name:'BARRERA DE VAPOR', spec:'Polietileno · rollo 50m² · 200 micrones',             price:12000, badge:null, img:'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=70' },
     ],
     tornilleria: [
-      { id:12, name:'AUTOPERFORANTE AGUJA', spec:'Pack ×500', price:4200, badge:'Stock' },
-      { id:13, name:'WAFER HEAD 6×25MM',    spec:'Pack ×500', price:3800, badge:null },
-      { id:14, name:'TACO FISCHER 6MM',     spec:'Pack ×100', price:2200, badge:null },
+      { id:12, name:'AUTOPERFORANTE AGUJA', spec:'Punta aguja · 25mm · Pack ×500 · Fosfatizado', price:4200, badge:'Stock', img:'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=600&q=70' },
+      { id:13, name:'WAFER HEAD 6×25MM',    spec:'Cabeza wafer · 6×25mm · Pack ×500 · Zincado', price:3800, badge:null, img:'https://images.unsplash.com/photo-1614963326505-843797d0e2be?auto=format&fit=crop&w=600&q=70' },
+      { id:14, name:'TACO FISCHER 6MM',     spec:'Nylon · 6mm · Pack ×100 · Uso general',       price:2200, badge:null, img:'https://images.unsplash.com/photo-1591129841117-3adfd313e34f?auto=format&fit=crop&w=600&q=70' },
     ],
     aislantes: [
-      { id:15, name:'LANA DE VIDRIO 50MM', spec:'Rollo 15m²',       price:18000, badge:'Stock' },
-      { id:16, name:'LANA DE ROCA 40MM',   spec:'Rollo 10m²',       price:22000, badge:null },
-      { id:17, name:'POLIESTIRENO 20MM',   spec:'Placa 1.20×0.60m', price:4500,  badge:null },
+      { id:15, name:'LANA DE VIDRIO 50MM', spec:'Densidad 11kg/m³ · Rollo 15m² · Aislación térmica', price:18000, badge:'Stock', img:'https://images.unsplash.com/photo-1768321916948-187505429cfa?auto=format&fit=crop&w=600&q=70' },
+      { id:16, name:'LANA DE ROCA 40MM',   spec:'Densidad 40kg/m³ · Rollo 10m² · Ignífuga clase A1', price:22000, badge:null, img:'https://images.unsplash.com/photo-1768321916128-c242ca443253?auto=format&fit=crop&w=600&q=70' },
+      { id:17, name:'POLIESTIRENO 20MM',   spec:'Expandido · Placa 1.20×0.60m · Aislante térmico', price:4500,  badge:null, img:'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=600&q=70' },
     ],
   };
 
@@ -705,10 +783,10 @@ class Component extends DCLogic {
     window.scrollTo({ top: y, behavior: 'smooth' });
   }
 
-  openWA = () => window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Quiero%20consultar%20sobre%20materiales.`, '_blank');
+  openWA = () => this.openWAText('Hola%20MSF!%20Quiero%20consultar%20sobre%20materiales.');
 
   openWAprod(name, priceFmt) {
-    window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Consulto%20por%20${encodeURIComponent(name)}%20(${encodeURIComponent(priceFmt)}).`, '_blank');
+    this.openWAText(`Hola%20MSF!%20Consulto%20por%20${encodeURIComponent(name)}%20(${encodeURIComponent(priceFmt)}).`);
   }
 
   addCart(id) {
@@ -745,7 +823,7 @@ class Component extends DCLogic {
     if (!items.length) return;
     const total = items.reduce((a, i) => a + i.price * i.qty, 0);
     const msg = items.map(i => `${i.name} ×${i.qty}`).join(', ') + `. Total: ${this.fmt(total)}`;
-    window.open(`https://wa.me/${this.WA}?text=Hola%20MSF!%20Pedido:%20${encodeURIComponent(msg)}`, '_blank');
+    this.openWAText(`Hola%20MSF!%20Pedido:%20${encodeURIComponent(msg)}`);
   };
 
   payMP = () => alert('Checkout MercadoPago — conectar credenciales reales de MSF en producción.');
@@ -834,6 +912,45 @@ class Component extends DCLogic {
     }
   };
 
+  // ---- Recuperar contraseña por email (código de 6 dígitos vía EmailJS) ----
+  sendResetCode = async () => {
+    const email = this.val('forgotEmail').toLowerCase();
+    if (!email) { this.setState({ authError: 'Ingresá tu email.' }); return; }
+    this.setState({ authError: 'Buscando tu cuenta...' });
+    const db = await this.getDb();
+    const snap = await db.collection('clients').where('email', '==', email).limit(1).get();
+    if (snap.empty) { this.setState({ authError: 'No encontramos una cuenta con ese email.' }); return; }
+    const client = snap.docs[0].data();
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 15 * 60000).toISOString();
+    await db.collection('clients').doc(client.id).update({ resetCode: code, resetCodeExpiresAt: expiresAt });
+    if (typeof window.emailjs !== 'undefined' && window.__msfEmailjsConfigured) {
+      try {
+        await window.emailjs.send(window.__msfEmailjsServiceId, window.__msfEmailjsTemplateId, {
+          to_email: email, subject: 'Tu código para recuperar tu contraseña — MSF',
+          message: `Hola ${client.nombre.split(' ')[0]},\n\nTu código para crear una contraseña nueva es: ${code}\n\nVence en 15 minutos. Si no lo pediste vos, ignorá este mensaje.`,
+        });
+      } catch (e) {}
+    }
+    this.setState({ authMode: 'forgotReset', authError: '', forgotEmailSent: email });
+  };
+
+  confirmResetPass = async () => {
+    const code = this.val('resetCode');
+    const newPass = this.val('resetNewPass');
+    const email = this.state.forgotEmailSent;
+    if (!code || !newPass) { this.setState({ authError: 'Completá el código y la contraseña nueva.' }); return; }
+    const db = await this.getDb();
+    const snap = await db.collection('clients').where('email', '==', email).limit(1).get();
+    if (snap.empty) { this.setState({ authError: 'No encontramos tu cuenta.' }); return; }
+    const client = snap.docs[0].data();
+    if (client.resetCode !== code) { this.setState({ authError: 'El código no es correcto.' }); return; }
+    if (client.resetCodeExpiresAt && new Date(client.resetCodeExpiresAt) < new Date()) { this.setState({ authError: 'El código venció. Pedí uno nuevo.' }); return; }
+    await db.collection('clients').doc(client.id).update({ pass: newPass, resetCode: null, resetCodeExpiresAt: null });
+    this.setState({ authMode: 'login', authError: '' });
+    this.showToast('Contraseña actualizada. Ya podés iniciar sesión.');
+  };
+
   logout = () => {
     localStorage.removeItem(this.LS.session);
     if (this._unsubQuotes) this._unsubQuotes();
@@ -874,9 +991,9 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
-    const ids = ['msfV1', 'msfV2'];
+    const ids = ['msfV1', 'msfV2', 'msfV3'];
     this.videos = ids.map(id => document.getElementById(id));
-    this.dots = [0, 1].map(i => document.getElementById('msfDot' + i));
+    this.dots = [0, 1, 2].map(i => document.getElementById('msfDot' + i));
     this.progress = document.getElementById('msfProgress');
     this.current = 0;
     this.DURATION = 8000;
@@ -954,7 +1071,7 @@ class Component extends DCLogic {
         name: p.name,
         spec: p.spec,
         badge: p.badge,
-        image: this.CAT_IMG[activeCat],
+        image: p.img || this.CAT_IMG[activeCat],
         priceFmt: this.fmt(p.price),
         onAdd: () => this.addCart(p.id),
         onWA: () => this.openWAprod(p.name, this.fmt(p.price)),
@@ -1002,6 +1119,15 @@ class Component extends DCLogic {
       accountDisplay: accountOpen ? 'flex' : 'none',
       isRegister: authMode === 'register',
       isLogin: authMode === 'login',
+      isNormalAuth: authMode === 'login' || authMode === 'register',
+      isForgotRequest: authMode === 'forgotRequest',
+      isForgotReset: authMode === 'forgotReset',
+      showAuthTabs: authMode !== 'forgotRequest' && authMode !== 'forgotReset',
+      forgotEmailSent: this.state.forgotEmailSent,
+      forgotCta: 'Enviar código',
+      setAuthForgot: () => this.setState({ authMode: 'forgotRequest', authError: '' }),
+      sendResetCode: this.sendResetCode,
+      confirmResetPass: this.confirmResetPass,
       loginTabColor: authMode === 'login' ? '#C8102E' : '#999',
       loginTabBorder: authMode === 'login' ? '#C8102E' : 'transparent',
       regTabColor: authMode === 'register' ? '#C8102E' : '#999',
