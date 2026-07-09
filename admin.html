@@ -11,6 +11,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="./firebase-msf.js"></script>
+<script>
+  (function () {
+    window.__msfEmailjsServiceId = 'service_8jhj6ab';
+    window.__msfEmailjsTemplateId = 'template_a0vwu2h';
+    window.__msfEmailjsPublicKey = '7yFiDa-eqAoONQJLs';
+    function init() {
+      if (!window.emailjs || window.__msfEmailjsConfigured) return;
+      window.emailjs.init({ publicKey: window.__msfEmailjsPublicKey });
+      window.__msfEmailjsConfigured = true;
+    }
+    if (window.emailjs) { init(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    s.onload = init;
+    document.head.appendChild(s);
+  })();
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   body { margin: 0; font-family: 'Open Sans', sans-serif; background: #f4f4f5; color: #1a1a1a; }
@@ -216,38 +233,65 @@
             <div style="padding:26px;display:flex;flex-direction:column;gap:22px;">
               <div>
                 <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">WhatsApp de pedidos y presupuestos</label>
-                <div style="font-size:12.5px;color:#999;margin:5px 0 10px;line-height:1.5;">Número al que llegan las consultas, pedidos y el botón flotante de WhatsApp del sitio.</div>
-                <div style="display:flex;gap:10px;">
-                  <input id="settingsWA" type="tel" value="{{ waNumberInput }}" placeholder="54 9 11 2345 6789" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
-                  <button onClick="{{ saveSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:0 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar</button>
+                <div style="font-size:12.5px;color:#999;margin:5px 0 12px;line-height:1.5;">Números a los que llegan las consultas y pedidos. Activá los que quieras que reciban.</div>
+
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+                  <div onClick="{{ toggleWa1 }}" style="width:44px;height:26px;background:{{ wa1ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
+                    <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa1KnobLeft }};transition:left .2s;"></div>
+                  </div>
+                  <input id="settingsWA1" type="tel" value="{{ wa1Input }}" placeholder="54 9 11 2345 6789 (Celular 1)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
                 </div>
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
+                  <div onClick="{{ toggleWa2 }}" style="width:44px;height:26px;background:{{ wa2ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
+                    <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa2KnobLeft }};transition:left .2s;"></div>
+                  </div>
+                  <input id="settingsWA2" type="tel" value="{{ wa2Input }}" placeholder="54 9 11 2345 6789 (Celular 2)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                </div>
+
+                <button onClick="{{ saveSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;width:100%;" style-hover="background:#9e0c23;">Guardar</button>
                 <sc-if value="{{ settingsSaved }}" hint-placeholder-val="{{ false }}">
                   <div style="font-size:12px;color:#1a7a3a;margin-top:8px;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> Guardado. Ya se aplica en el sitio.</div>
                 </sc-if>
               </div>
               <div style="border-top:1px solid #eee;padding-top:20px;font-size:11.5px;color:#aaa;line-height:1.6;">
-                Este número reemplaza al de fábrica en el botón de WhatsApp, la ficha de contacto y los mensajes de pedido del sitio.
+                Con los dos activados, cada consulta por WhatsApp se abre para enviar a ambos celulares al mismo tiempo. Apagá uno para que ese celular deje de recibir.
               </div>
             </div>
           </div>
 
           <div style="background:#fff;border:1px solid #e2e2e2;max-width:640px;margin-top:20px;">
             <div style="background:#0a0a0a;padding:20px 26px;border-bottom:3px solid #C8102E;">
-              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Respaldo de datos</div>
-              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Los clientes y presupuestos viven en este navegador. Hacé respaldos seguido.</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:8px;"><i class="ti ti-mail-forward" style="color:#C8102E;"></i> Respaldo automático por email</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:300;margin-top:3px;">Además del respaldo diario en la nube, se puede enviar una copia por email a una casilla exclusiva para esto.</div>
             </div>
-            <div style="padding:26px;display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                <button onClick="{{ exportBackup }}" style="flex:1;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px;" style-hover="background:#1a1a1a;"><i class="ti ti-download"></i> Descargar respaldo (.json)</button>
-                <label style="flex:1;background:#fff;color:#0a0a0a;border:1.5px solid #0a0a0a;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px;" style-hover="background:#0a0a0a;color:#fff;">
-                  <i class="ti ti-upload"></i> Restaurar desde archivo
-                  <input type="file" accept="application/json" onChange="{{ importBackup }}" style="display:none;">
-                </label>
+            <div style="padding:26px;display:flex;flex-direction:column;gap:18px;">
+              <div>
+                <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Email de respaldo</label>
+                <input id="backupEmail" type="email" value="{{ backupEmailInput }}" onInput="{{ onBackupEmailChange }}" placeholder="respaldos-msf@ejemplo.com" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
               </div>
-              <sc-if value="{{ backupMsg }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:12px;color:{{ backupMsgColor }};display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> {{ backupMsg }}</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:160px;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Frecuencia</label>
+                  <select id="backupFreq" value="{{ backupFreqInput }}" onChange="{{ onBackupFreqChange }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <option value="daily">Diario</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                  </select>
+                </div>
+                <div style="flex:1;min-width:140px;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Horario</label>
+                  <select id="backupHour" value="{{ backupHourInput }}" onChange="{{ onBackupHourChange }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <sc-for list="{{ hourOptions }}" as="h" hint-placeholder-count="24">
+                      <option value="{{ h.value }}">{{ h.label }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+              </div>
+              <button onClick="{{ saveBackupSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar</button>
+              <div style="font-size:12.5px;color:#999;line-height:1.6;">{{ backupStatusText }}</div>
+              <sc-if value="{{ backupSettingsSaved }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;color:#1a7a3a;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check"></i> Guardado.</div>
               </sc-if>
-              <div style="font-size:11.5px;color:#aaa;line-height:1.6;">Recomendado: descargá un respaldo antes de publicar cambios nuevos del sitio, y restauralo después si hace falta.</div>
             </div>
           </div>
 
@@ -318,7 +362,8 @@ class Component extends DCLogic {
     authed: localStorage.getItem('msf_admin_session_v1') === '1',
     loginError: '', tab: 'quotes', search: '',
     clients: [], quotes: [], settings: {}, snapshots: [],
-    settingsSaved: false, backupMsg: '', backupOk: true, tick: 0,
+    settingsSaved: false, backupMsg: '', backupOk: true, backupSettingsSaved: false, tick: 0,
+    backupEmailDraft: null, backupFreqDraft: null, backupHourDraft: null,
   };
 
   waitForDb() {
@@ -342,9 +387,12 @@ class Component extends DCLogic {
       const quotes = snap.docs.map(d => d.data());
       this.setState({ quotes });
       this.autoSnapshotIfNeeded(quotes, this.state.clients);
+      this.maybeSendScheduledBackup(this.state.settings, this.state.clients, quotes);
     });
     db.collection('settings').doc('main').onSnapshot(doc => {
-      this.setState({ settings: doc.exists ? doc.data() : {} });
+      const settings = doc.exists ? doc.data() : {};
+      this.setState({ settings });
+      this.maybeSendScheduledBackup(settings, this.state.clients, this.state.quotes);
     });
     db.collection('snapshots').onSnapshot(snap => {
       const rows = snap.docs.filter(d => d.id !== 'prerestore').map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.id.localeCompare(a.id));
@@ -436,50 +484,81 @@ class Component extends DCLogic {
     await db.collection('clients').doc(c.id).update({ activo: c.activo === false ? true : false });
   };
 
-  exportBackup = () => {
-    const data = { clients: this.state.clients, quotes: this.state.quotes, settings: this.state.settings, exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().slice(0, 10);
-    a.href = url; a.download = `msf-respaldo-${stamp}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    this.setState({ backupMsg: 'Respaldo descargado.', backupOk: true });
-    clearTimeout(this._backupT);
-    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 4000);
+  // ---- Respaldo automático por email (diario / semanal / mensual) ----
+  onBackupEmailChange = (e) => this.setState({ backupEmailDraft: e.target.value });
+  onBackupFreqChange = (e) => this.setState({ backupFreqDraft: e.target.value });
+  onBackupHourChange = (e) => this.setState({ backupHourDraft: e.target.value });
+
+  saveBackupSettings = async () => {
+    const { backupEmailDraft, backupFreqDraft, backupHourDraft, settings } = this.state;
+    const email = (backupEmailDraft != null ? backupEmailDraft : (settings.backupEmail || '')).trim();
+    const freq = backupFreqDraft != null ? backupFreqDraft : (settings.backupFreq || 'daily');
+    const hour = parseInt(backupHourDraft != null ? backupHourDraft : (settings.backupHour != null ? settings.backupHour : 8), 10);
+    const db = await this.getDb();
+    await db.collection('settings').doc('main').set({ backupEmail: email, backupFreq: freq, backupHour: hour }, { merge: true });
+    this.setState({ backupSettingsSaved: true });
+    clearTimeout(this._backupSavedT);
+    this._backupSavedT = setTimeout(() => this.setState({ backupSettingsSaved: false }), 3000);
   };
 
-  importBackup = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (!Array.isArray(data.clients) || !Array.isArray(data.quotes)) throw new Error('formato');
-        const db = await this.getDb();
-        const batch = db.batch();
-        data.clients.forEach(c => batch.set(db.collection('clients').doc(c.id), c));
-        data.quotes.forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
-        if (data.settings) batch.set(db.collection('settings').doc('main'), data.settings);
-        await batch.commit();
-        this.setState({ backupMsg: `Restaurado: ${data.clients.length} clientes, ${data.quotes.length} presupuestos.`, backupOk: true });
-      } catch (err) {
-        this.setState({ backupMsg: 'El archivo no es un respaldo válido.', backupOk: false });
-      }
-      clearTimeout(this._backupT);
-      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+  isBackupDue(settings) {
+    if (!settings.backupEmail) return false;
+    const now = new Date();
+    const hour = settings.backupHour != null ? settings.backupHour : 8;
+    if (now.getHours() < hour) return false;
+    const last = settings.lastBackupSentAt ? new Date(settings.lastBackupSentAt) : null;
+    if (!last) return true;
+    const days = (now - last) / 86400000;
+    if (settings.backupFreq === 'weekly') return days >= 7;
+    if (settings.backupFreq === 'monthly') return days >= 28;
+    return days >= 1; // daily
+  }
+
+  async maybeSendScheduledBackup(settings, clients, quotes) {
+    if (this._backupCheckDone) return;
+    if (!settings || !this.isBackupDue(settings)) return;
+    this._backupCheckDone = true; // evita reintentos repetidos en la misma sesión
+    const db = await this.getDb();
+    // Marcar primero (evita duplicados si dos pestañas de admin están abiertas a la vez)
+    await db.collection('settings').doc('main').set({ lastBackupSentAt: new Date().toISOString() }, { merge: true });
+    this.sendBackupEmail(settings.backupEmail, clients, quotes);
+  }
+
+  async sendBackupEmail(toEmail, clients, quotes) {
+    if (typeof window.emailjs === 'undefined' || !window.__msfEmailjsConfigured) {
+      console.warn('MSF: falta conectar EmailJS para poder enviar el respaldo por email.');
+      return;
+    }
+    const stamp = new Date().toLocaleDateString('es-AR');
+    const resumen = `Respaldo MSF — ${stamp}\n\nClientes: ${clients.length}\nPresupuestos: ${quotes.length}\n\n` +
+      clients.map(c => `• ${c.nombre} — ${c.email} — ${c.tel || ''}`).join('\n') + '\n\n' +
+      quotes.map(q => `• ${q.tipo} — ${q.fecha ? new Date(q.fecha).toLocaleDateString('es-AR') : ''} — ${q.total ? '$' + q.total : (q.mensaje || '')}`).join('\n');
+    try {
+      await window.emailjs.send(window.__msfEmailjsServiceId, window.__msfEmailjsTemplateId, {
+        to_email: toEmail, subject: `Respaldo MSF — ${stamp}`, message: resumen,
+      });
+    } catch (e) { console.warn('MSF: error enviando respaldo por email', e); }
+  }
+
+  toggleWa1 = async () => {
+    const db = await this.getDb();
+    const cur = (this.state.settings || {}).wa1Active !== false;
+    await db.collection('settings').doc('main').set({ wa1Active: !cur }, { merge: true });
+  };
+
+  toggleWa2 = async () => {
+    const db = await this.getDb();
+    const cur = (this.state.settings || {}).wa2Active !== false;
+    await db.collection('settings').doc('main').set({ wa2Active: !cur }, { merge: true });
   };
 
   saveSettings = async () => {
-    const e = document.getElementById('settingsWA');
-    const num = e ? e.value.trim() : '';
+    const e1 = document.getElementById('settingsWA1');
+    const e2 = document.getElementById('settingsWA2');
+    const num1 = e1 ? e1.value.trim() : '';
+    const num2 = e2 ? e2.value.trim() : '';
     const db = await this.getDb();
-    await db.collection('settings').doc('main').set({ whatsappNumber: num }, { merge: true });
+    await db.collection('settings').doc('main').set({ whatsappNumber1: num1, whatsappNumber2: num2 }, { merge: true });
     this.setState({ settingsSaved: true });
     clearTimeout(this._savedT);
     this._savedT = setTimeout(() => this.setState({ settingsSaved: false }), 3000);
@@ -548,7 +627,7 @@ class Component extends DCLogic {
   };
 
   renderVals() {
-    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk } = this.state;
+    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk, backupSettingsSaved } = this.state;
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -631,13 +710,32 @@ class Component extends DCLogic {
       clientsTabBg: tab === 'clients' ? '#C8102E' : '#fff',
       settingsTabColor: tab === 'settings' ? '#fff' : '#666',
       settingsTabBg: tab === 'settings' ? '#C8102E' : '#fff',
-      waNumberInput: settings.whatsappNumber || '',
+      wa1Input: settings.whatsappNumber1 || settings.whatsappNumber || '',
+      wa2Input: settings.whatsappNumber2 || '',
+      wa1ToggleBg: settings.wa1Active !== false ? '#C8102E' : 'rgba(0,0,0,.15)',
+      wa2ToggleBg: settings.wa2Active !== false ? '#C8102E' : 'rgba(0,0,0,.15)',
+      wa1KnobLeft: settings.wa1Active !== false ? '21px' : '3px',
+      wa2KnobLeft: settings.wa2Active !== false ? '21px' : '3px',
+      toggleWa1: this.toggleWa1,
+      toggleWa2: this.toggleWa2,
       saveSettings: this.saveSettings,
       settingsSaved,
-      exportBackup: this.exportBackup,
-      importBackup: this.importBackup,
       backupMsg,
       backupMsgColor: backupOk ? '#1a7a3a' : '#C8102E',
+      backupEmailInput: this.state.backupEmailDraft != null ? this.state.backupEmailDraft : (settings.backupEmail || ''),
+      backupFreqInput: this.state.backupFreqDraft != null ? this.state.backupFreqDraft : (settings.backupFreq || 'daily'),
+      backupHourInput: this.state.backupHourDraft != null ? this.state.backupHourDraft : (settings.backupHour != null ? String(settings.backupHour) : '8'),
+      hourOptions: Array.from({ length: 24 }, (_, h) => ({ value: String(h), label: (h < 10 ? '0' + h : h) + ':00 hs' })),
+      onBackupEmailChange: this.onBackupEmailChange,
+      onBackupFreqChange: this.onBackupFreqChange,
+      onBackupHourChange: this.onBackupHourChange,
+      saveBackupSettings: this.saveBackupSettings,
+      backupSettingsSaved,
+      backupStatusText: settings.backupEmail
+        ? (settings.lastBackupSentAt
+            ? `Último envío: ${new Date(settings.lastBackupSentAt).toLocaleString('es-AR')}.`
+            : 'Todavía no se envió ningún respaldo — se enviará según la frecuencia y horario configurados.')
+        : 'Cargá un email para activar el envío automático.',
       snapshotRows: (this.state.snapshots || []).slice(0, 14).map(snap => ({
         fecha: new Date(snap.id + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }),
         resumen: `${(snap.clients || []).length} clientes · ${(snap.quotes || []).length} presupuestos`,
