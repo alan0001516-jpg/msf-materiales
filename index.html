@@ -10,6 +10,7 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&amp;family=Open+Sans:wght@300;400;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="./firebase-msf.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -606,14 +607,13 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;1136561527&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;heroAutoplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
   state = { activeCat: 'perfiles', cart: {}, drawerOpen: false,
-    user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '' };
+    user: null, quotes: [], authOpen: false, authMode: 'login', authError: '', accountOpen: false, toast: '', remoteSettings: {}, dbConnecting: false };
 
-  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1' };
+  LS = { session: 'msf_session_v1' }; // solo guardamos localmente CUÁL es la sesión activa en este navegador
 
   get WA() {
-    let stored = '';
-    try { stored = (JSON.parse(localStorage.getItem('msf_settings_v1')) || {}).whatsappNumber || ''; } catch (e) {}
-    return (stored || this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, '');
+    const remote = (this.state.remoteSettings || {}).whatsappNumber || '';
+    return (remote || this.props.whatsappNumber || '5491100000000').replace(/[^0-9]/g, '');
   }
 
   CATS = [
@@ -750,59 +750,20 @@ class Component extends DCLogic {
 
   payMP = () => alert('Checkout MercadoPago — conectar credenciales reales de MSF en producción.');
 
-  // ---- Base de datos simulada (localStorage) con respaldo diario automático ----
-  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
-  loadClients() { return this.loadJSON(this.LS.clients); }
-  saveClients(a) { localStorage.setItem(this.LS.clients, JSON.stringify(a)); this.autoSnapshot(); }
-  loadQuotes() { return this.loadJSON(this.LS.quotes); }
-  saveQuotes(a) { localStorage.setItem(this.LS.quotes, JSON.stringify(a)); this.archiveQuotes(a); this.autoSnapshot(); }
-
-  archiveQuotes(quotes) {
-    const archive = this.loadJSON('msf_quotes_archive_v1');
-    const byId = {}; archive.forEach(q => byId[q.id] = q);
-    let changed = false;
-    quotes.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; changed = true; } });
-    if (changed) localStorage.setItem('msf_quotes_archive_v1', JSON.stringify(Object.values(byId)));
-  }
-
-  // Guarda una copia fechada de la base (clientes+presupuestos) una vez por día, sin acción del usuario.
-  // Conserva los últimos 14 días. Si la base principal aparece vacía al arrancar, se autorestaura del snapshot más reciente.
-  autoSnapshot() {
-    const clientsNow = this.loadJSON(this.LS.clients);
-    const quotesNow = this.loadJSON(this.LS.quotes);
-    if (clientsNow.length === 0 && quotesNow.length === 0) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const key = 'msf_snap_' + today;
-    localStorage.setItem(key, JSON.stringify({
-      clients: clientsNow,
-      quotes: quotesNow,
-      settings: (() => { try { return JSON.parse(localStorage.getItem('msf_settings_v1')) || {}; } catch (e) { return {}; } })(),
-      savedAt: new Date().toISOString(),
-    }));
-    // limpiar snapshots viejos (>14 días)
-    Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).forEach(k => {
-      const d = k.replace('msf_snap_', '');
-      if ((Date.now() - new Date(d).getTime()) > 14 * 86400000) localStorage.removeItem(k);
+  // ---- Base de datos real compartida (Firestore) ----
+  // Todos los navegadores/dispositivos leen y escriben la misma base en la nube.
+  waitForDb() {
+    return new Promise(resolve => {
+      if (window.__msfDb) { resolve(window.__msfDb); return; }
+      window.addEventListener('msf-firebase-ready', () => resolve(window.__msfDb), { once: true });
     });
   }
 
-  autoRestoreIfEmpty() {
-    const clients = this.loadJSON(this.LS.clients);
-    const quotes = this.loadJSON(this.LS.quotes);
-    if (clients.length > 0 || quotes.length > 0) { this.autoSnapshot(); return; }
-    const snapKeys = Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).sort().reverse();
-    for (const k of snapKeys) {
-      try {
-        const snap = JSON.parse(localStorage.getItem(k));
-        if (snap && ((snap.clients && snap.clients.length) || (snap.quotes && snap.quotes.length))) {
-          localStorage.setItem(this.LS.clients, JSON.stringify(snap.clients || []));
-          localStorage.setItem(this.LS.quotes, JSON.stringify(snap.quotes || []));
-          if (snap.settings) localStorage.setItem('msf_settings_v1', JSON.stringify(snap.settings));
-          return;
-        }
-      } catch (e) {}
-    }
+  async getDb() {
+    if (!this._dbPromise) this._dbPromise = this.waitForDb();
+    return this._dbPromise;
   }
+
   val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 
   showToast(msg) {
@@ -811,46 +772,76 @@ class Component extends DCLogic {
     this._toastT = setTimeout(() => this.setState({ toast: '' }), 4000);
   }
 
-  restoreSession() {
+  async attachSettingsListener() {
+    const db = await this.getDb();
+    db.collection('settings').doc('main').onSnapshot(doc => {
+      this.setState({ remoteSettings: doc.exists ? doc.data() : {} });
+    });
+  }
+
+  attachQuotesListener(clientId) {
+    if (this._unsubQuotes) this._unsubQuotes();
+    this.getDb().then(db => {
+      this._unsubQuotes = db.collection('quotes').where('clientId', '==', clientId)
+        .onSnapshot(snap => {
+          const quotes = snap.docs.map(d => d.data()).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+          this.setState({ quotes });
+        }, () => {});
+    });
+  }
+
+  async restoreSession() {
     const sid = localStorage.getItem(this.LS.session);
     if (!sid) return;
-    const c = this.loadClients().find(x => x.id === sid);
-    if (c) this.setState({ user: c, quotes: this.loadQuotes() });
+    const db = await this.getDb();
+    const doc = await db.collection('clients').doc(sid).get();
+    if (doc.exists) {
+      const c = doc.data();
+      if (c.activo === false) { localStorage.removeItem(this.LS.session); return; }
+      this.setState({ user: c });
+      this.attachQuotesListener(c.id);
+    }
   }
 
   startSession(c) {
     localStorage.setItem(this.LS.session, c.id);
-    this.setState({ user: c, authOpen: false, authError: '', quotes: this.loadQuotes() });
+    this.setState({ user: c, authOpen: false, authError: '' });
+    this.attachQuotesListener(c.id);
     this.showToast('¡Hola ' + c.nombre.split(' ')[0] + '! Sesión iniciada.');
   }
 
-  submitAuth = () => {
+  submitAuth = async () => {
     const mode = this.state.authMode;
     const email = this.val('authEmail').toLowerCase();
     const pass = this.val('authPass');
     if (!email || !pass) { this.setState({ authError: 'Completá email y contraseña.' }); return; }
+    this.setState({ authError: 'Conectando...' });
+    const db = await this.getDb();
+    const snap = await db.collection('clients').where('email', '==', email).limit(1).get();
     if (mode === 'login') {
-      const c = this.loadClients().find(x => x.email === email && x.pass === pass);
-      if (!c) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
+      if (snap.empty) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
+      const c = snap.docs[0].data();
+      if (c.pass !== pass) { this.setState({ authError: 'Email o contraseña incorrectos.' }); return; }
       if (c.activo === false) { this.setState({ authError: 'Tu cuenta está dada de baja. Contactanos por WhatsApp para reactivarla.' }); return; }
       this.startSession(c);
     } else {
       const nombre = this.val('authNombre');
       if (!nombre) { this.setState({ authError: 'Ingresá tu nombre.' }); return; }
-      const clients = this.loadClients();
-      if (clients.some(x => x.email === email)) { this.setState({ authError: 'Ese email ya está registrado. Iniciá sesión.' }); return; }
-      const c = { id: 'c' + Date.now(), nombre, empresa: this.val('authEmpresa'), tel: this.val('authTel'), email, pass, createdAt: new Date().toISOString() };
-      clients.push(c); this.saveClients(clients); this.startSession(c);
+      if (!snap.empty) { this.setState({ authError: 'Ese email ya está registrado. Iniciá sesión.' }); return; }
+      const c = { id: 'c' + Date.now(), nombre, empresa: this.val('authEmpresa'), tel: this.val('authTel'), email, pass, createdAt: new Date().toISOString(), activo: true };
+      await db.collection('clients').doc(c.id).set(c);
+      this.startSession(c);
     }
   };
 
   logout = () => {
     localStorage.removeItem(this.LS.session);
-    this.setState({ user: null, accountOpen: false });
+    if (this._unsubQuotes) this._unsubQuotes();
+    this.setState({ user: null, accountOpen: false, quotes: [] });
     this.showToast('Sesión cerrada.');
   };
 
-  saveQuoteFromCart = () => {
+  saveQuoteFromCart = async () => {
     if (!this.state.user) {
       this.setState({ drawerOpen: false, authOpen: true, authMode: 'login', authError: 'Ingresá o registrate para guardar tu presupuesto.' });
       return;
@@ -858,26 +849,27 @@ class Component extends DCLogic {
     const items = Object.values(this.state.cart);
     if (!items.length) return;
     const total = items.reduce((a, i) => a + i.price * i.qty, 0);
-    const quotes = this.loadQuotes();
-    quotes.push({ id: 'q' + Date.now(), clientId: this.state.user.id, fecha: new Date().toISOString(), tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) });
-    this.saveQuotes(quotes);
-    this.setState({ quotes, cart: {}, drawerOpen: false, accountOpen: true });
+    const id = 'q' + Date.now();
+    const quote = { id, clientId: this.state.user.id, fecha: new Date().toISOString(), tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) };
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).set(quote);
+    this.setState({ cart: {}, drawerOpen: false, accountOpen: true });
     this.showToast('Presupuesto enviado. Lo vas a ver en "Mi cuenta".');
   };
 
-  sendForm = () => {
+  sendForm = async () => {
     const email = this.val('cfEmail').toLowerCase();
     const msg = this.val('cfMsg');
     if (!email || !msg) { this.showToast('Completá email y el detalle de tu pedido.'); return; }
-    const quotes = this.loadQuotes();
-    quotes.push({
-      id: 'q' + Date.now(), clientId: this.state.user ? this.state.user.id : null,
+    const id = 'q' + Date.now();
+    const quote = {
+      id, clientId: this.state.user ? this.state.user.id : null,
       fecha: new Date().toISOString(), tipo: 'Consulta', estado: 'Pendiente',
       nombre: this.val('cfNombre'), empresa: this.val('cfEmpresa'), email, tel: this.val('cfTel'), mensaje: msg,
-    });
-    this.saveQuotes(quotes);
-    this.setState({ quotes });
-    ['cfNombre', 'cfEmpresa', 'cfEmail', 'cfTel', 'cfMsg'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+    };
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).set(quote);
+    ['cfNombre', 'cfEmpresa', 'cfEmail', 'cfTel', 'cfMsg'].forEach(fid => { const e = document.getElementById(fid); if (e) e.value = ''; });
     this.showToast('¡Consulta enviada! Te respondemos en horario de atención.');
   };
 
@@ -888,7 +880,7 @@ class Component extends DCLogic {
     this.progress = document.getElementById('msfProgress');
     this.current = 0;
     this.DURATION = 8000;
-    this.autoRestoreIfEmpty();
+    this.attachSettingsListener();
     this.restoreSession();
 
     this.videos.forEach((v, i) => {
@@ -937,7 +929,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const { activeCat, cart, drawerOpen, user, quotes, authOpen, authMode, authError, accountOpen, toast } = this.state;
-    const myQuotes = (quotes || []).filter(q => user && q.clientId === user.id).slice().reverse();
+    const myQuotes = quotes || [];
     const cartItems = Object.values(cart);
     const subtotal = cartItems.reduce((a, i) => a + i.price * i.qty, 0);
     const count = cartItems.reduce((a, i) => a + i.qty, 0);

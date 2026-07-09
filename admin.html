@@ -10,6 +10,7 @@
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="./firebase-msf.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   body { margin: 0; font-family: 'Open Sans', sans-serif; background: #f4f4f5; color: #1a1a1a; }
@@ -291,7 +292,7 @@
           </div>
         </sc-if>
 
-        <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:14px;"></i> Datos almacenados localmente en este navegador (prototipo). Para centralizar la base entre dispositivos, conectar un backend.</div>
+        <div style="margin-top:18px;font-size:11.5px;color:#aaa;display:flex;align-items:center;gap:7px;line-height:1.5;"><i class="ti ti-cloud-check" style="font-size:14px;color:#1a7a3a;"></i> Base de datos compartida en la nube (Firestore) — se ve igual desde cualquier PC o celular.</div>
       </div>
     </div>
   </sc-if>
@@ -310,122 +311,133 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  LS = { clients: 'msf_clients_v1', session: 'msf_session_v1', quotes: 'msf_quotes_v1', admin: 'msf_admin_session_v1', settings: 'msf_settings_v1' };
+  LS = { admin: 'msf_admin_session_v1' }; // solo la sesión de admin queda local; todo lo demás vive en Firestore
   PASS = 'msf2026';
 
-  // Estado inicial leído de forma síncrona (sin esperar a componentDidMount) para que,
-  // si ya había una sesión de admin, la primera pintura ya muestre clientes/presupuestos reales
-  // y nunca una fila en blanco a mitad de camino.
-  state = (() => {
-    const safe = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
-    const authed = localStorage.getItem('msf_admin_session_v1') === '1';
-    return {
-      authed, loginError: '', tab: 'quotes', search: '',
-      clients: authed ? safe('msf_clients_v1', []) : [],
-      quotes: authed ? safe('msf_quotes_v1', []) : [],
-      settings: authed ? safe('msf_settings_v1', {}) : {},
-      settingsSaved: false, backupMsg: '', backupOk: true, tick: 0,
-    };
-  })();
+  state = {
+    authed: localStorage.getItem('msf_admin_session_v1') === '1',
+    loginError: '', tab: 'quotes', search: '',
+    clients: [], quotes: [], settings: {}, snapshots: [],
+    settingsSaved: false, backupMsg: '', backupOk: true, tick: 0,
+  };
 
-  loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
-  loadObj(key) { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; } }
-  load() { this.setState({ clients: this.loadJSON(this.LS.clients), quotes: this.loadJSON(this.LS.quotes), settings: this.loadObj(this.LS.settings) }); this.autoSnapshotIfNeeded(); }
+  waitForDb() {
+    return new Promise(resolve => {
+      if (window.__msfDb) { resolve(window.__msfDb); return; }
+      window.addEventListener('msf-firebase-ready', () => resolve(window.__msfDb), { once: true });
+    });
+  }
+  async getDb() {
+    if (!this._dbPromise) this._dbPromise = this.waitForDb();
+    return this._dbPromise;
+  }
 
-  // Respaldo diario automático: guarda una copia fechada de la base sin acción del usuario. Conserva 14 días.
-  // Nunca guarda un día "vacío" (evita que después alguien restaure por error una copia sin datos).
-  autoSnapshotIfNeeded() {
-    const clients = this.loadJSON(this.LS.clients);
-    const quotes = this.loadJSON(this.LS.quotes);
-    this.archiveQuotes(quotes); // archivo histórico de pedidos, nunca se borra
-    if (clients.length === 0 && quotes.length === 0) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const key = 'msf_snap_' + today;
-    localStorage.setItem(key, JSON.stringify({
-      clients, quotes,
-      settings: this.loadObj(this.LS.settings),
-      savedAt: new Date().toISOString(),
-    }));
-    Object.keys(localStorage).filter(k => k.startsWith('msf_snap_')).forEach(k => {
-      const d = k.replace('msf_snap_', '');
-      if ((Date.now() - new Date(d).getTime()) > 14 * 86400000) localStorage.removeItem(k);
+  // Suscripciones en tiempo real: cualquier cambio hecho desde OTRA PC se refleja acá al instante.
+  async attachListeners() {
+    const db = await this.getDb();
+    db.collection('clients').onSnapshot(snap => {
+      this.setState({ clients: snap.docs.map(d => d.data()) });
+    });
+    db.collection('quotes').onSnapshot(snap => {
+      const quotes = snap.docs.map(d => d.data());
+      this.setState({ quotes });
+      this.autoSnapshotIfNeeded(quotes, this.state.clients);
+    });
+    db.collection('settings').doc('main').onSnapshot(doc => {
+      this.setState({ settings: doc.exists ? doc.data() : {} });
+    });
+    db.collection('snapshots').onSnapshot(snap => {
+      const rows = snap.docs.filter(d => d.id !== 'prerestore').map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.id.localeCompare(a.id));
+      this.setState({ snapshots: rows });
+    });
+    db.collection('snapshots').doc('prerestore').onSnapshot(doc => {
+      this.setState({ hasPrerestoreDoc: doc.exists });
     });
   }
 
-  // Archivo histórico de pedidos: se acumula, nunca se borra ni se pisa, aunque se restaure un respaldo viejo.
-  archiveQuotes(quotes) {
-    const archive = this.loadJSON('msf_quotes_archive_v1');
-    const byId = {}; archive.forEach(q => byId[q.id] = q);
-    let changed = false;
-    quotes.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; changed = true; } });
-    if (changed) localStorage.setItem('msf_quotes_archive_v1', JSON.stringify(Object.values(byId)));
-  }
-
-  listSnapshots() {
-    return Object.keys(localStorage).filter(k => k.startsWith('msf_snap_') && k !== 'msf_snap_prerestore').sort().reverse();
-  }
-
-  hasPrerestore() { return !!localStorage.getItem('msf_snap_prerestore'); }
-
-  restoreSnapshot(key) {
-    try {
-      const snap = JSON.parse(localStorage.getItem(key));
-      if (!snap) return;
-      const fecha = key.replace('msf_snap_', '');
-      const nClients = (snap.clients || []).length, nQuotes = (snap.quotes || []).length;
-      const ok = window.confirm(
-        `¿Restaurar el respaldo del ${fecha}?\n\nVa a reemplazar la base actual (${this.state.clients.length} clientes, ${this.state.quotes.length} pedidos) por esta copia: ${nClients} clientes, ${nQuotes} pedidos.\n\nSe guarda automáticamente una copia de seguridad de lo actual antes de reemplazar, por si hace falta deshacer.`
-      );
-      if (!ok) return;
-      // Copia de seguridad de "justo antes de restaurar", para poder deshacer
-      localStorage.setItem('msf_snap_prerestore', JSON.stringify({
-        clients: this.loadJSON(this.LS.clients),
-        quotes: this.loadJSON(this.LS.quotes),
-        settings: this.loadObj(this.LS.settings),
+  // Respaldo diario automático en la nube: una copia fechada de toda la base, una vez por día,
+  // sin acción del usuario. Nunca guarda un día "vacío". Se conservan los últimos 14 días.
+  autoSnapshotIfNeeded(quotes, clients) {
+    if ((!quotes || !quotes.length) && (!clients || !clients.length)) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (this._snapshotDoneFor === today) return;
+    this._snapshotDoneFor = today;
+    this.getDb().then(db => {
+      db.collection('snapshots').doc(today).set({
+        clients: clients || this.state.clients,
+        quotes: quotes || this.state.quotes,
+        settings: this.state.settings || {},
         savedAt: new Date().toISOString(),
-      }));
-      localStorage.setItem(this.LS.clients, JSON.stringify(snap.clients || []));
-      localStorage.setItem(this.LS.quotes, JSON.stringify(snap.quotes || []));
-      if (snap.settings) localStorage.setItem(this.LS.settings, JSON.stringify(snap.settings));
-      this.load();
-      this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + fecha + '. (Se guardó una copia de lo anterior por si querés deshacer.)', backupOk: true });
-      clearTimeout(this._backupT);
-      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 6000);
-    } catch (e) {}
+      });
+      // limpiar respaldos de más de 14 días
+      db.collection('snapshots').get().then(snap => {
+        snap.docs.forEach(d => {
+          if (d.id === 'prerestore') return;
+          if ((Date.now() - new Date(d.id).getTime()) > 14 * 86400000) db.collection('snapshots').doc(d.id).delete();
+        });
+      });
+    });
   }
 
-  undoLastRestore = () => {
-    this.restoreSnapshot('msf_snap_prerestore');
+  hasPrerestore() { return !!this.state.hasPrerestoreDoc; }
+
+  restoreSnapshot = async (id, snapData) => {
+    const nClients = (snapData.clients || []).length, nQuotes = (snapData.quotes || []).length;
+    const ok = window.confirm(
+      `¿Restaurar el respaldo del ${id}?\n\nVa a reemplazar la base actual (${this.state.clients.length} clientes, ${this.state.quotes.length} pedidos) por esta copia: ${nClients} clientes, ${nQuotes} pedidos.\n\nSe guarda automáticamente una copia de seguridad de lo actual antes de reemplazar, por si hace falta deshacer.`
+    );
+    if (!ok) return;
+    const db = await this.getDb();
+    // copia de "justo antes de restaurar", para poder deshacer
+    await db.collection('snapshots').doc('prerestore').set({
+      clients: this.state.clients, quotes: this.state.quotes, settings: this.state.settings, savedAt: new Date().toISOString(),
+    });
+    const batch = db.batch();
+    (snapData.clients || []).forEach(c => batch.set(db.collection('clients').doc(c.id), c));
+    (snapData.quotes || []).forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+    if (snapData.settings) batch.set(db.collection('settings').doc('main'), snapData.settings);
+    await batch.commit();
+    this.setState({ backupMsg: 'Base restaurada desde el respaldo del ' + id + '. (Se guardó una copia de lo anterior por si querés deshacer.)', backupOk: true });
+    clearTimeout(this._backupT);
+    this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 6000);
   };
 
-  recoverQuotesFromArchive = () => {
-    const archive = this.loadJSON('msf_quotes_archive_v1');
-    if (!archive.length) { this.setState({ backupMsg: 'El archivo histórico todavía no tiene pedidos guardados.', backupOk: false }); return; }
-    const current = this.loadJSON(this.LS.quotes);
-    const byId = {}; current.forEach(q => byId[q.id] = q);
+  undoLastRestore = async () => {
+    const db = await this.getDb();
+    const doc = await db.collection('snapshots').doc('prerestore').get();
+    if (!doc.exists) return;
+    this.restoreSnapshot('anterior', doc.data());
+  };
+
+  recoverQuotesFromArchive = async () => {
+    // El archivo histórico son los propios documentos de "quotes": nunca se eliminan desde la UI,
+    // así que este botón vuelve a traer del último respaldo cualquier pedido que falte.
+    const db = await this.getDb();
+    const snaps = await db.collection('snapshots').get();
+    const byId = {};
+    this.state.quotes.forEach(q => byId[q.id] = q);
     let added = 0;
-    archive.forEach(q => { if (!byId[q.id]) { byId[q.id] = q; added++; } });
-    const merged = Object.values(byId);
-    localStorage.setItem(this.LS.quotes, JSON.stringify(merged));
-    this.setState({ quotes: merged, backupMsg: added > 0 ? `Se recuperaron ${added} pedido(s) del archivo histórico.` : 'No faltaba ningún pedido: ya estaban todos.', backupOk: true });
+    snaps.docs.forEach(d => {
+      if (d.id === 'prerestore') return;
+      (d.data().quotes || []).forEach(q => { if (!byId[q.id]) { byId[q.id] = q; added++; } });
+    });
+    if (added > 0) {
+      const batch = db.batch();
+      Object.values(byId).forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+      await batch.commit();
+    }
+    this.setState({ backupMsg: added > 0 ? `Se recuperaron ${added} pedido(s) de los respaldos.` : 'No faltaba ningún pedido: ya estaban todos.', backupOk: true });
     clearTimeout(this._backupT);
     this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 5000);
   };
 
-  toggleClient(id) {
-    const clients = this.loadJSON(this.LS.clients).map(c => c.id === id ? { ...c, activo: c.activo === false ? true : false } : c);
-    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
-    this.setState({ clients });
-    this.autoSnapshotIfNeeded();
-  }
+  toggleClient = async (c) => {
+    const db = await this.getDb();
+    await db.collection('clients').doc(c.id).update({ activo: c.activo === false ? true : false });
+  };
 
   exportBackup = () => {
-    const data = {
-      clients: this.loadJSON(this.LS.clients),
-      quotes: this.loadJSON(this.LS.quotes),
-      settings: this.loadObj(this.LS.settings),
-      exportedAt: new Date().toISOString(),
-    };
+    const data = { clients: this.state.clients, quotes: this.state.quotes, settings: this.state.settings, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -442,14 +454,16 @@ class Component extends DCLogic {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const data = JSON.parse(reader.result);
         if (!Array.isArray(data.clients) || !Array.isArray(data.quotes)) throw new Error('formato');
-        localStorage.setItem(this.LS.clients, JSON.stringify(data.clients));
-        localStorage.setItem(this.LS.quotes, JSON.stringify(data.quotes));
-        if (data.settings) localStorage.setItem(this.LS.settings, JSON.stringify(data.settings));
-        this.load();
+        const db = await this.getDb();
+        const batch = db.batch();
+        data.clients.forEach(c => batch.set(db.collection('clients').doc(c.id), c));
+        data.quotes.forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+        if (data.settings) batch.set(db.collection('settings').doc('main'), data.settings);
+        await batch.commit();
         this.setState({ backupMsg: `Restaurado: ${data.clients.length} clientes, ${data.quotes.length} presupuestos.`, backupOk: true });
       } catch (err) {
         this.setState({ backupMsg: 'El archivo no es un respaldo válido.', backupOk: false });
@@ -461,18 +475,18 @@ class Component extends DCLogic {
     e.target.value = '';
   };
 
-  saveSettings = () => {
+  saveSettings = async () => {
     const e = document.getElementById('settingsWA');
     const num = e ? e.value.trim() : '';
-    const settings = { ...this.loadObj(this.LS.settings), whatsappNumber: num };
-    localStorage.setItem(this.LS.settings, JSON.stringify(settings));
-    this.setState({ settings, settingsSaved: true });
+    const db = await this.getDb();
+    await db.collection('settings').doc('main').set({ whatsappNumber: num }, { merge: true });
+    this.setState({ settingsSaved: true });
     clearTimeout(this._savedT);
     this._savedT = setTimeout(() => this.setState({ settingsSaved: false }), 3000);
   };
 
   componentDidMount() {
-    if (this.state.authed) this.autoSnapshotIfNeeded();
+    if (this.state.authed) this.attachListeners();
   }
 
   doLogin = () => {
@@ -481,7 +495,7 @@ class Component extends DCLogic {
     if (v === this.PASS) {
       localStorage.setItem(this.LS.admin, '1');
       this.setState({ authed: true, loginError: '' });
-      this.load();
+      this.attachListeners();
     } else {
       this.setState({ loginError: 'Clave incorrecta. Probá de nuevo.' });
     }
@@ -491,16 +505,14 @@ class Component extends DCLogic {
 
   doLogout = () => { localStorage.removeItem(this.LS.admin); this.setState({ authed: false }); };
 
-  refresh = () => { this.load(); };
+  refresh = () => { this.setState({ backupMsg: 'Los datos se actualizan solos en tiempo real.', backupOk: true }); clearTimeout(this._backupT); this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 3000); };
 
   onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
 
-  setStatus(id, estado) {
-    const quotes = this.loadJSON(this.LS.quotes).map(q => q.id === id ? { ...q, estado } : q);
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
-    this.setState({ quotes });
-    this.autoSnapshotIfNeeded();
-  }
+  setStatus = async (id, estado) => {
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).update({ estado });
+  };
 
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
 
@@ -514,13 +526,13 @@ class Component extends DCLogic {
     return { nombre: q.nombre || 'Consulta web', contacto: q.email || '—' };
   }
 
-  seedDemo = () => {
+  seedDemo = async () => {
     const now = Date.now();
     const day = 86400000;
     const clients = [
-      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString() },
-      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString() },
-      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString() },
+      { id: 'demo1', nombre: 'Martín Gómez', empresa: 'Constructora Gómez SRL', tel: '11 4455 6677', email: 'martin@gomezsrl.com', pass: 'demo', createdAt: new Date(now - 9 * day).toISOString(), activo: true },
+      { id: 'demo2', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', tel: '11 5566 7788', email: 'laura@lfarq.com', pass: 'demo', createdAt: new Date(now - 6 * day).toISOString(), activo: true },
+      { id: 'demo3', nombre: 'Diego Sosa', empresa: 'Obra particular', tel: '11 6677 8899', email: 'diego.sosa@mail.com', pass: 'demo', createdAt: new Date(now - 3 * day).toISOString(), activo: true },
     ];
     const quotes = [
       { id: 'dq1', clientId: 'demo1', fecha: new Date(now - 8 * day).toISOString(), tipo: 'Pedido', estado: 'Cerrado', total: 184500, items: [{ name: 'DURLOCK 12.5MM', qty: 6, price: 21000 }, { name: 'MONTANTE 70×35', qty: 18, price: 3200 }] },
@@ -528,10 +540,11 @@ class Component extends DCLogic {
       { id: 'dq3', clientId: 'demo3', fecha: new Date(now - 2 * day).toISOString(), tipo: 'Pedido', estado: 'Pendiente', total: 64000, items: [{ name: 'OSB 11MM', qty: 2, price: 32000 }] },
       { id: 'dq4', clientId: 'demo2', fecha: new Date(now - 1 * day).toISOString(), tipo: 'Consulta', estado: 'Pendiente', nombre: 'Laura Fernández', empresa: 'Estudio LF Arquitectura', email: 'laura@lfarq.com', tel: '11 5566 7788', mensaje: 'Necesito cotizar cielorraso suspendido para 80 m², ¿tienen stock de perfiles?' },
     ];
-    localStorage.setItem(this.LS.clients, JSON.stringify(clients));
-    localStorage.setItem(this.LS.quotes, JSON.stringify(quotes));
-    this.setState({ clients, quotes });
-    this.autoSnapshotIfNeeded();
+    const db = await this.getDb();
+    const batch = db.batch();
+    clients.forEach(c => batch.set(db.collection('clients').doc(c.id), c));
+    quotes.forEach(q => batch.set(db.collection('quotes').doc(q.id), q));
+    await batch.commit();
   };
 
   renderVals() {
@@ -584,7 +597,7 @@ class Component extends DCLogic {
         btnBg: active ? '#fff' : '#0a0a0a',
         btnColor: active ? '#C8102E' : '#fff',
         btnBorder: active ? '#C8102E' : '#0a0a0a',
-        onToggle: () => this.toggleClient(c.id),
+        onToggle: () => this.toggleClient(c),
       };
     });
 
@@ -625,21 +638,17 @@ class Component extends DCLogic {
       importBackup: this.importBackup,
       backupMsg,
       backupMsgColor: backupOk ? '#1a7a3a' : '#C8102E',
-      snapshotRows: this.listSnapshots().slice(0, 14).map(k => {
-        let snap = {}; try { snap = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) {}
-        const fecha = k.replace('msf_snap_', '');
-        return {
-          fecha: new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }),
-          resumen: `${(snap.clients || []).length} clientes · ${(snap.quotes || []).length} presupuestos`,
-          onRestore: () => this.restoreSnapshot(k),
-        };
-      }),
-      hasSnapshots: this.listSnapshots().length > 0,
-      noSnapshots: this.listSnapshots().length === 0,
+      snapshotRows: (this.state.snapshots || []).slice(0, 14).map(snap => ({
+        fecha: new Date(snap.id + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }),
+        resumen: `${(snap.clients || []).length} clientes · ${(snap.quotes || []).length} presupuestos`,
+        onRestore: () => this.restoreSnapshot(snap.id, snap),
+      })),
+      hasSnapshots: (this.state.snapshots || []).length > 0,
+      noSnapshots: (this.state.snapshots || []).length === 0,
       hasPrerestore: this.hasPrerestore(),
       undoLastRestore: this.undoLastRestore,
       recoverQuotesFromArchive: this.recoverQuotesFromArchive,
-      archiveCount: this.loadJSON('msf_quotes_archive_v1').length,
+      archiveCount: quotes.length,
 
       quoteRows,
       hasQuotes: quoteRows.length > 0,
