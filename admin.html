@@ -240,7 +240,7 @@
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
                 <div>
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Categoría</label>
-                  <select id="pfCategory" value="{{ pfCategoryVal }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                  <select id="pfCategory" defaultValue="{{ pfCategoryVal }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
                     <sc-for list="{{ categoryOptions }}" as="cat" hint-placeholder-count="5">
                       <option value="{{ cat.id }}">{{ cat.name }}</option>
                     </sc-for>
@@ -248,23 +248,23 @@
                 </div>
                 <div>
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Nombre del producto</label>
-                  <input id="pfName" type="text" value="{{ pfNameVal }}" placeholder="Ej: MONTANTE 70×35" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <input id="pfName" type="text" defaultValue="{{ pfNameVal }}" placeholder="Ej: MONTANTE 70×35" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
                 </div>
                 <div style="grid-column:1 / -1;">
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Especificación</label>
-                  <input id="pfSpec" type="text" value="{{ pfSpecVal }}" placeholder="Ej: Galvanizado · 3 mts · Espesor 0.5mm" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <input id="pfSpec" type="text" defaultValue="{{ pfSpecVal }}" placeholder="Ej: Galvanizado · 3 mts · Espesor 0.5mm" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
                 </div>
                 <div>
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Precio ($)</label>
-                  <input id="pfPrice" type="number" value="{{ pfPriceVal }}" placeholder="3200" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <input id="pfPrice" type="number" defaultValue="{{ pfPriceVal }}" placeholder="3200" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
                 </div>
                 <div>
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Etiqueta (opcional)</label>
-                  <input id="pfBadge" type="text" value="{{ pfBadgeVal }}" placeholder="Ej: Stock" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <input id="pfBadge" type="text" defaultValue="{{ pfBadgeVal }}" placeholder="Ej: Stock" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
                 </div>
                 <div style="grid-column:1 / -1;">
                   <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">URL de la foto</label>
-                  <input id="pfImg" type="text" value="{{ pfImgVal }}" placeholder="https://..." style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <input id="pfImg" type="text" defaultValue="{{ pfImgVal }}" placeholder="https://..." style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
                   <div style="font-size:11.5px;color:#aaa;margin-top:6px;">Pegá el link de una foto ya subida (por ejemplo desde el celular a Google Fotos / Drive con acceso público, o cualquier link directo a la imagen).</div>
                 </div>
               </div>
@@ -291,7 +291,14 @@
                 <tbody>
                   <sc-for list="{{ productRows }}" as="p" hint-placeholder-count="6">
                     <tr style="border-bottom:1px solid #eee;opacity:{{ p.rowOpacity }};" style-hover="background:#fafafa;">
-                      <td style="padding:10px 18px;"><img src="{{ p.img }}" style="width:44px;height:44px;object-fit:cover;background:#f0f0f0;display:block;"></td>
+                      <td style="padding:10px 18px;">
+                        <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}">
+                          <img src="{{ p.img }}" loading="lazy" style="width:44px;height:44px;object-fit:cover;background:#f0f0f0;display:block;">
+                        </sc-if>
+                        <sc-if value="{{ p.noImg }}" hint-placeholder-val="{{ true }}">
+                          <div style="width:44px;height:44px;background:#f0f0f0;"></div>
+                        </sc-if>
+                      </td>
                       <td style="padding:14px 18px;">
                         <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ p.name }}</div>
                         <div style="font-size:12px;color:#999;">{{ p.spec }}</div>
@@ -335,13 +342,13 @@
                   <div onClick="{{ toggleWa1 }}" style="width:44px;height:26px;background:{{ wa1ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
                     <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa1KnobLeft }};transition:left .2s;"></div>
                   </div>
-                  <input id="settingsWA1" type="tel" value="{{ wa1Input }}" placeholder="54 9 11 2345 6789 (Celular 1)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                  <input id="settingsWA1" type="tel" defaultValue="{{ wa1Input }}" placeholder="54 9 11 2345 6789 (Celular 1)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
                   <div onClick="{{ toggleWa2 }}" style="width:44px;height:26px;background:{{ wa2ToggleBg }};border-radius:16px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;">
                     <div style="width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:{{ wa2KnobLeft }};transition:left .2s;"></div>
                   </div>
-                  <input id="settingsWA2" type="tel" value="{{ wa2Input }}" placeholder="54 9 11 2345 6789 (Celular 2)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
+                  <input id="settingsWA2" type="tel" defaultValue="{{ wa2Input }}" placeholder="54 9 11 2345 6789 (Celular 2)" style="flex:1;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;" style-focus="border-color:#C8102E;">
                 </div>
 
                 <button onClick="{{ saveSettings }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;width:100%;" style-hover="background:#9e0c23;">Guardar</button>
@@ -855,6 +862,7 @@ class Component extends DCLogic {
       return {
         id: p.id,
         img: p.img,
+        noImg: !p.img,
         name: p.name,
         spec: p.spec || '',
         categoryName: catName(p.category),
