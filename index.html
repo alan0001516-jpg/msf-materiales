@@ -770,7 +770,10 @@ class Component extends DCLogic {
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
 
   findProd(id) {
-    for (const arr of Object.values(this.PRODS)) {
+    const sources = (this.state.remoteProducts && this.state.remoteProducts.length)
+      ? [this.state.remoteProducts]
+      : Object.values(this.PRODS);
+    for (const arr of sources) {
       const p = arr.find(x => x.id === id);
       if (p) return p;
     }
@@ -854,6 +857,16 @@ class Component extends DCLogic {
     const db = await this.getDb();
     db.collection('settings').doc('main').onSnapshot(doc => {
       this.setState({ remoteSettings: doc.exists ? doc.data() : {} });
+    });
+  }
+
+  // Catálogo cargado por MSF desde el panel. Si todavía no cargaron nada, se usa el catálogo
+  // de ejemplo (this.PRODS) para que el sitio nunca se vea vacío.
+  async attachProductsListener() {
+    const db = await this.getDb();
+    db.collection('products').onSnapshot(snap => {
+      const list = snap.docs.map(d => d.data()).filter(p => p.active !== false);
+      this.setState({ remoteProducts: list });
     });
   }
 
@@ -998,6 +1011,7 @@ class Component extends DCLogic {
     this.current = 0;
     this.DURATION = 8000;
     this.attachSettingsListener();
+    this.attachProductsListener();
     this.restoreSession();
 
     this.videos.forEach((v, i) => {
@@ -1045,9 +1059,16 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const { activeCat, cart, drawerOpen, user, quotes, authOpen, authMode, authError, accountOpen, toast } = this.state;
+    const { activeCat, cart, drawerOpen, user, quotes, authOpen, authMode, authError, accountOpen, toast, remoteProducts } = this.state;
     const myQuotes = quotes || [];
     const cartItems = Object.values(cart);
+    // Catálogo: el que cargó MSF desde el panel (Firestore) si ya hay alguno, si no el de ejemplo.
+    const prodsByCategory = (() => {
+      if (!remoteProducts || !remoteProducts.length) return this.PRODS;
+      const grouped = {};
+      remoteProducts.forEach(p => { (grouped[p.category] = grouped[p.category] || []).push(p); });
+      return grouped;
+    })();
     const subtotal = cartItems.reduce((a, i) => a + i.price * i.qty, 0);
     const count = cartItems.reduce((a, i) => a + i.qty, 0);
 
@@ -1067,7 +1088,7 @@ class Component extends DCLogic {
       sistemas: this.SISTEMAS.map(s => ({ ...s, onClick: this.openWA })),
       projects: this.PROJECTS,
 
-      products: (this.PRODS[activeCat] || []).map(p => ({
+      products: (prodsByCategory[activeCat] || []).map(p => ({
         name: p.name,
         spec: p.spec,
         badge: p.badge,

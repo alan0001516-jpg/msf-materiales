@@ -114,6 +114,7 @@
           <div style="display:flex;background:#fff;border:1px solid #e2e2e2;">
             <div onClick="{{ tabQuotes }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ quotesTabColor }};background:{{ quotesTabBg }};">Presupuestos</div>
             <div onClick="{{ tabClients }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ clientsTabColor }};background:{{ clientsTabBg }};">Clientes</div>
+            <div onClick="{{ tabProducts }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ productsTabColor }};background:{{ productsTabBg }};">Productos</div>
             <div onClick="{{ tabSettings }}" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:12px 22px;cursor:pointer;color:{{ settingsTabColor }};background:{{ settingsTabBg }};">Ajustes</div>
           </div>
           <sc-if value="{{ showSearchBar }}" hint-placeholder-val="{{ true }}">
@@ -122,7 +123,15 @@
                 <i class="ti ti-search" style="color:#aaa;font-size:16px;"></i>
                 <input id="adminSearch" type="text" placeholder="Buscar..." onInput="{{ onSearch }}" style="border:none;outline:none;padding:11px 0;font-family:'Open Sans',sans-serif;font-size:14px;width:200px;background:transparent;">
               </div>
-              <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
+              <sc-if value="{{ showProductActions }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ toggleAddProduct }}" style="background:#C8102E;border:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="background:#9e0c23;"><i class="ti ti-plus"></i> Nuevo producto</button>
+                <sc-if value="{{ showMigrate }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ migrateCatalog }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Cargar catálogo actual</button>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ showSeedDemo }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ seedDemo }}" style="background:#fff;border:1px solid #e2e2e2;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 14px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:6px;" style-hover="border-color:#C8102E;color:#C8102E;"><i class="ti ti-database-plus"></i> Datos demo</button>
+              </sc-if>
             </div>
           </sc-if>
         </div>
@@ -221,6 +230,93 @@
               </div>
             </sc-if>
           </div>
+        </sc-if>
+
+        <!-- PRODUCTS -->
+        <sc-if value="{{ showProducts }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ showAddProductForm }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #e2e2e2;border-top:3px solid #C8102E;padding:22px;margin-bottom:18px;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">{{ productFormTitle }}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Categoría</label>
+                  <select id="pfCategory" value="{{ pfCategoryVal }}" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;background:#fff;">
+                    <sc-for list="{{ categoryOptions }}" as="cat" hint-placeholder-count="5">
+                      <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Nombre del producto</label>
+                  <input id="pfName" type="text" value="{{ pfNameVal }}" placeholder="Ej: MONTANTE 70×35" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Especificación</label>
+                  <input id="pfSpec" type="text" value="{{ pfSpecVal }}" placeholder="Ej: Galvanizado · 3 mts · Espesor 0.5mm" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Precio ($)</label>
+                  <input id="pfPrice" type="number" value="{{ pfPriceVal }}" placeholder="3200" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div>
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">Etiqueta (opcional)</label>
+                  <input id="pfBadge" type="text" value="{{ pfBadgeVal }}" placeholder="Ej: Stock" style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                </div>
+                <div style="grid-column:1 / -1;">
+                  <label style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#999;letter-spacing:.1em;text-transform:uppercase;">URL de la foto</label>
+                  <input id="pfImg" type="text" value="{{ pfImgVal }}" placeholder="https://..." style="width:100%;border:1px solid #d8d8d8;padding:12px 14px;font-family:'Open Sans',sans-serif;font-size:14px;outline:none;margin-top:6px;" style-focus="border-color:#C8102E;">
+                  <div style="font-size:11.5px;color:#aaa;margin-top:6px;">Pegá el link de una foto ya subida (por ejemplo desde el celular a Google Fotos / Drive con acceso público, o cualquier link directo a la imagen).</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:18px;">
+                <button onClick="{{ saveProduct }}" style="background:#C8102E;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;" style-hover="background:#9e0c23;">Guardar producto</button>
+                <button onClick="{{ cancelProductForm }}" style="background:#fff;color:#666;border:1px solid #d8d8d8;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:13px 22px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cancelar</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
+            <sc-if value="{{ hasProducts }}" hint-placeholder-val="{{ true }}">
+              <table style="width:100%;border-collapse:collapse;min-width:820px;">
+                <thead>
+                  <tr style="background:#0a0a0a;">
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Foto</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Producto</th>
+                    <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Categoría</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Precio</th>
+                    <th style="text-align:center;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ productRows }}" as="p" hint-placeholder-count="6">
+                    <tr style="border-bottom:1px solid #eee;opacity:{{ p.rowOpacity }};" style-hover="background:#fafafa;">
+                      <td style="padding:10px 18px;"><img src="{{ p.img }}" style="width:44px;height:44px;object-fit:cover;background:#f0f0f0;display:block;"></td>
+                      <td style="padding:14px 18px;">
+                        <div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#0a0a0a;">{{ p.name }}</div>
+                        <div style="font-size:12px;color:#999;">{{ p.spec }}</div>
+                      </td>
+                      <td style="padding:14px 18px;font-size:13px;color:#555;">{{ p.categoryName }}</td>
+                      <td style="padding:14px 18px;text-align:right;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#0a0a0a;white-space:nowrap;">{{ p.priceFmt }}</td>
+                      <td style="padding:14px 18px;text-align:center;"><span onClick="{{ p.onToggle }}" style="cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ p.estadoColor }};border:1px solid {{ p.estadoColor }};padding:4px 10px;">{{ p.estadoLabel }}</span></td>
+                      <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
+                        <button onClick="{{ p.onEdit }}" style="background:#fff;border:1px solid #d8d8d8;color:#666;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;margin-right:6px;" style-hover="border-color:#0a0a0a;color:#0a0a0a;">Editar</button>
+                        <button onClick="{{ p.onDelete }}" style="background:#fff;border:1px solid #d8d8d8;color:#C8102E;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;" style-hover="border-color:#C8102E;background:#C8102E;color:#fff;">Eliminar</button>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
+            <sc-if value="{{ noProducts }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:70px 20px;color:#bbb;">
+                <i class="ti ti-package" style="font-size:48px;color:#e0e0e0;"></i>
+                <div style="font-size:14px;margin-top:14px;line-height:1.6;">No hay productos cargados en la base todavía.<br>El sitio muestra el catálogo de ejemplo mientras tanto.</div>
+                <button onClick="{{ migrateCatalog }}" style="margin-top:18px;background:#0a0a0a;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:11px 20px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Cargar catálogo de ejemplo como base</button>
+              </div>
+            </sc-if>
+          </div>
+          <div style="margin-top:14px;font-size:11.5px;color:#aaa;line-height:1.5;">Los cambios se ven al instante en el sitio, en cualquier PC o celular — sin tener que volver a publicar nada.</div>
         </sc-if>
 
         <!-- SETTINGS -->
@@ -361,10 +457,41 @@ class Component extends DCLogic {
   state = {
     authed: localStorage.getItem('msf_admin_session_v1') === '1',
     loginError: '', tab: 'quotes', search: '',
-    clients: [], quotes: [], settings: {}, snapshots: [],
+    clients: [], quotes: [], settings: {}, snapshots: [], products: [],
     settingsSaved: false, backupMsg: '', backupOk: true, backupSettingsSaved: false, tick: 0,
     backupEmailDraft: null, backupFreqDraft: null, backupHourDraft: null,
+    productFormOpen: false, editingProductId: null,
   };
+
+  CATEGORIES = [
+    { id: 'perfiles', name: 'Perfiles' },
+    { id: 'placas', name: 'Placas' },
+    { id: 'membrana', name: 'Membrana' },
+    { id: 'tornilleria', name: 'Tornillería' },
+    { id: 'aislantes', name: 'Aislantes' },
+  ];
+
+  // Catálogo actual del sitio (el mismo que ya ven los clientes), para poder migrarlo
+  // a la base con un clic y seguir editándolo desde acá.
+  CURRENT_CATALOG = [
+    { category: 'perfiles', name: 'MONTANTE 70×35', spec: 'Galvanizado · 3 mts · Espesor 0.5mm · Alma 70mm', price: 3200, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'MONTANTE 100×50', spec: 'Galvanizado · 3 mts · Espesor 0.5mm · Alma 100mm', price: 4800, badge: null, img: 'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'SOLERA 70×25', spec: 'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price: 2100, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321903410-54961e343b71?auto=format&fit=crop&w=700&q=72' },
+    { category: 'perfiles', name: 'SOLERA 100×25', spec: 'Galvanizada · 3 mts · Ala 25mm · Terminación Z275', price: 2900, badge: null, img: 'https://images.unsplash.com/photo-1768321917129-80494daec0e9?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'DURLOCK 9.5MM', spec: 'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price: 18500, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321902331-7d21aa3faf5a?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'DURLOCK 12.5MM', spec: 'Standard · 1.20×2.40 m · Borde afinado · Ignífuga', price: 21000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321917995-2d992c50854b?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'OSB 11MM', spec: 'Estructural · 1.22×2.44 m · Machihembrado · Exterior', price: 32000, badge: null, img: 'https://images.unsplash.com/photo-1595514535215-8f0a3e2e5c95?auto=format&fit=crop&w=700&q=72' },
+    { category: 'placas', name: 'PLACA RH', spec: 'Resistente a la humedad · 1.20×2.40 m · Color verde', price: 26000, badge: null, img: 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'TYVEK', spec: 'Hidrófuga transpirable · rollo 50m² · Marca Dupont', price: 28000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'MEMBRANA FOIL', spec: 'Kraft aluminizada · rollo 50m² · Barrera radiante', price: 14500, badge: null, img: 'https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&w=700&q=72' },
+    { category: 'membrana', name: 'BARRERA DE VAPOR', spec: 'Polietileno · rollo 50m² · 200 micrones', price: 12000, badge: null, img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'AUTOPERFORANTE AGUJA', spec: 'Punta aguja · 25mm · Pack ×500 · Fosfatizado', price: 4200, badge: 'Stock', img: 'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'WAFER HEAD 6×25MM', spec: 'Cabeza wafer · 6×25mm · Pack ×500 · Zincado', price: 3800, badge: null, img: 'https://images.unsplash.com/photo-1614963326505-843797d0e2be?auto=format&fit=crop&w=700&q=72' },
+    { category: 'tornilleria', name: 'TACO FISCHER 6MM', spec: 'Nylon · 6mm · Pack ×100 · Uso general', price: 2200, badge: null, img: 'https://images.unsplash.com/photo-1591129841117-3adfd313e34f?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'LANA DE VIDRIO 50MM', spec: 'Densidad 11kg/m³ · Rollo 15m² · Aislación térmica', price: 18000, badge: 'Stock', img: 'https://images.unsplash.com/photo-1768321916948-187505429cfa?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'LANA DE ROCA 40MM', spec: 'Densidad 40kg/m³ · Rollo 10m² · Ignífuga clase A1', price: 22000, badge: null, img: 'https://images.unsplash.com/photo-1768321916128-c242ca443253?auto=format&fit=crop&w=700&q=72' },
+    { category: 'aislantes', name: 'POLIESTIRENO 20MM', spec: 'Expandido · Placa 1.20×0.60m · Aislante térmico', price: 4500, badge: null, img: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=700&q=72' },
+  ];
 
   waitForDb() {
     return new Promise(resolve => {
@@ -401,7 +528,62 @@ class Component extends DCLogic {
     db.collection('snapshots').doc('prerestore').onSnapshot(doc => {
       this.setState({ hasPrerestoreDoc: doc.exists });
     });
+    db.collection('products').onSnapshot(snap => {
+      this.setState({ products: snap.docs.map(d => d.data()) });
+    });
   }
+
+  // ---- Productos: alta / edición / baja / eliminación ----
+  toggleAddProduct = () => this.setState(s => ({
+    productFormOpen: !s.productFormOpen, editingProductId: null,
+  }));
+
+  cancelProductForm = () => this.setState({ productFormOpen: false, editingProductId: null });
+
+  editProduct = (p) => this.setState({ productFormOpen: true, editingProductId: p.id });
+
+  saveProduct = async () => {
+    const category = this.val('pfCategory') || this.CATEGORIES[0].id;
+    const name = this.val('pfName');
+    const spec = this.val('pfSpec');
+    const price = parseFloat(this.val('pfPrice')) || 0;
+    const badge = this.val('pfBadge');
+    const img = this.val('pfImg');
+    if (!name || !img) {
+      this.setState({ backupMsg: 'Falta el nombre o la foto del producto.', backupOk: false });
+      clearTimeout(this._backupT);
+      this._backupT = setTimeout(() => this.setState({ backupMsg: '' }), 4000);
+      return;
+    }
+    const db = await this.getDb();
+    const id = this.state.editingProductId || ('p' + Date.now());
+    await db.collection('products').doc(id).set({
+      id, category, name, spec, price, badge: badge || null, img, active: true,
+    }, { merge: true });
+    this.setState({ productFormOpen: false, editingProductId: null });
+  };
+
+  toggleProductActive = async (p) => {
+    const db = await this.getDb();
+    await db.collection('products').doc(p.id).update({ active: p.active === false ? true : false });
+  };
+
+  deleteProduct = async (p) => {
+    if (!window.confirm(`¿Eliminar "${p.name}" del catálogo? Esta acción no se puede deshacer.`)) return;
+    const db = await this.getDb();
+    await db.collection('products').doc(p.id).delete();
+  };
+
+  // Trae el catálogo que ya ven los clientes hoy y lo carga en la base para poder editarlo desde acá.
+  migrateCatalog = async () => {
+    const db = await this.getDb();
+    const batch = db.batch();
+    this.CURRENT_CATALOG.forEach((p, i) => {
+      const id = 'cat' + i;
+      batch.set(db.collection('products').doc(id), { ...p, id, active: true });
+    });
+    await batch.commit();
+  };
 
   // Respaldo diario automático en la nube: una copia fechada de toda la base, una vez por día,
   // sin acción del usuario. Nunca guarda un día "vacío". Se conservan los últimos 14 días.
@@ -595,6 +777,8 @@ class Component extends DCLogic {
 
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
 
+  val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+
   estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
 
   clientName(q, clients) {
@@ -627,7 +811,7 @@ class Component extends DCLogic {
   };
 
   renderVals() {
-    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk, backupSettingsSaved } = this.state;
+    const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk, backupSettingsSaved, products, productFormOpen, editingProductId } = this.state;
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -657,6 +841,30 @@ class Component extends DCLogic {
         estado: q.estado,
         estadoColor: this.estadoColor(q.estado),
         onStatus: (e) => this.setStatus(q.id, e.target.value),
+      };
+    });
+
+    const editProd = editingProductId ? products.find(p => p.id === editingProductId) : null;
+    const catName = (id) => (this.CATEGORIES.find(c => c.id === id) || {}).name || id;
+    const matchP = (p) => {
+      if (!s) return true;
+      return (p.name + ' ' + (p.spec || '') + ' ' + catName(p.category)).toLowerCase().includes(s);
+    };
+    const productRows = products.slice().filter(matchP).sort((a, b) => catName(a.category).localeCompare(catName(b.category)) || a.name.localeCompare(b.name)).map(p => {
+      const active = p.active !== false;
+      return {
+        id: p.id,
+        img: p.img,
+        name: p.name,
+        spec: p.spec || '',
+        categoryName: catName(p.category),
+        priceFmt: this.fmt(p.price || 0),
+        rowOpacity: active ? 1 : 0.5,
+        estadoLabel: active ? 'Visible' : 'Oculto',
+        estadoColor: active ? '#1a7a3a' : '#999',
+        onToggle: () => this.toggleProductActive(p),
+        onEdit: () => this.editProduct(p),
+        onDelete: () => this.deleteProduct(p),
       };
     });
 
@@ -699,15 +907,21 @@ class Component extends DCLogic {
 
       tabQuotes: () => this.setState({ tab: 'quotes' }),
       tabClients: () => this.setState({ tab: 'clients' }),
+      tabProducts: () => this.setState({ tab: 'products' }),
       tabSettings: () => this.setState({ tab: 'settings' }),
       showQuotes: tab === 'quotes',
       showClients: tab === 'clients',
+      showProducts: tab === 'products',
       showSettings: tab === 'settings',
       showSearchBar: tab !== 'settings',
+      showSeedDemo: tab === 'quotes' || tab === 'clients',
+      showProductActions: tab === 'products',
       quotesTabColor: tab === 'quotes' ? '#fff' : '#666',
       quotesTabBg: tab === 'quotes' ? '#C8102E' : '#fff',
       clientsTabColor: tab === 'clients' ? '#fff' : '#666',
       clientsTabBg: tab === 'clients' ? '#C8102E' : '#fff',
+      productsTabColor: tab === 'products' ? '#fff' : '#666',
+      productsTabBg: tab === 'products' ? '#C8102E' : '#fff',
       settingsTabColor: tab === 'settings' ? '#fff' : '#666',
       settingsTabBg: tab === 'settings' ? '#C8102E' : '#fff',
       wa1Input: settings.whatsappNumber1 || settings.whatsappNumber || '',
@@ -754,6 +968,24 @@ class Component extends DCLogic {
       clientRows,
       hasClients: clientRows.length > 0,
       noClients: clientRows.length === 0,
+
+      toggleAddProduct: this.toggleAddProduct,
+      cancelProductForm: this.cancelProductForm,
+      saveProduct: this.saveProduct,
+      migrateCatalog: this.migrateCatalog,
+      showAddProductForm: productFormOpen,
+      showMigrate: products.length === 0,
+      productFormTitle: editingProductId ? 'Editar producto' : 'Nuevo producto',
+      categoryOptions: this.CATEGORIES,
+      pfCategoryVal: editProd ? editProd.category : this.CATEGORIES[0].id,
+      pfNameVal: editProd ? editProd.name : '',
+      pfSpecVal: editProd ? editProd.spec : '',
+      pfPriceVal: editProd ? editProd.price : '',
+      pfBadgeVal: editProd ? (editProd.badge || '') : '',
+      pfImgVal: editProd ? editProd.img : '',
+      productRows,
+      hasProducts: productRows.length > 0,
+      noProducts: productRows.length === 0,
     };
   }
 }
