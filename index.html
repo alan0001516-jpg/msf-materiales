@@ -979,6 +979,8 @@ class Component extends DCLogic {
     const items = Object.values(this.state.cart);
     if (!items.length) return;
     const total = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const msg = items.map(i => `${i.name} ×${i.qty}`).join(', ') + `. Total: ${this.fmt(total)}`;
+    this.openWAText(`Hola%20MSF!%20Presupuesto%20de%20${encodeURIComponent(this.state.user.nombre || 'cliente')}:%20${encodeURIComponent(msg)}`);
     const id = 'q' + Date.now();
     const quote = { id, clientId: this.state.user.id, fecha: new Date().toISOString(), tipo: 'Pedido', estado: 'Pendiente', total, items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })) };
     const db = await this.getDb();
@@ -991,6 +993,8 @@ class Component extends DCLogic {
     const email = this.val('cfEmail').toLowerCase();
     const msg = this.val('cfMsg');
     if (!email || !msg) { this.showToast('Completá email y el detalle de tu pedido.'); return; }
+    const nombre = this.val('cfNombre') || 'Cliente';
+    this.openWAText(`Hola%20MSF!%20Consulta%20de%20${encodeURIComponent(nombre)}:%20${encodeURIComponent(msg)}`);
     const id = 'q' + Date.now();
     const quote = {
       id, clientId: this.state.user ? this.state.user.id : null,

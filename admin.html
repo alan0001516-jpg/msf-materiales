@@ -138,6 +138,11 @@
 
         <!-- QUOTES TABLE -->
         <sc-if value="{{ showQuotes }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <sc-for list="{{ statusFilters }}" as="sf" hint-placeholder-count="4">
+              <button onClick="{{ sf.onClick }}" style="background:{{ sf.bg }};color:{{ sf.color }};border:1px solid {{ sf.border }};font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 16px;cursor:pointer;">{{ sf.label }}</button>
+            </sc-for>
+          </div>
           <div class="msf-tbl-wrap" style="background:#fff;border:1px solid #e2e2e2;overflow-x:auto;">
             <sc-if value="{{ hasQuotes }}" hint-placeholder-val="{{ true }}">
               <table style="width:100%;border-collapse:collapse;min-width:820px;">
@@ -777,6 +782,8 @@ class Component extends DCLogic {
 
   onSearch = (e) => this.setState({ search: e.target.value.toLowerCase() });
 
+  setStatusFilter = (f) => this.setState({ statusFilter: f });
+
   setStatus = async (id, estado) => {
     const db = await this.getDb();
     await db.collection('quotes').doc(id).update({ estado });
@@ -819,6 +826,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const { authed, loginError, tab, search, clients, quotes, settings, settingsSaved, backupMsg, backupOk, backupSettingsSaved, products, productFormOpen, editingProductId } = this.state;
+    const statusFilter = this.state.statusFilter || 'Pendiente';
 
     const pending = quotes.filter(q => q.estado === 'Pendiente').length;
     const value = quotes.filter(q => q.total).reduce((a, q) => a + q.total, 0);
@@ -834,7 +842,13 @@ class Component extends DCLogic {
       return (c.nombre + ' ' + (c.empresa || '') + ' ' + c.email + ' ' + (c.tel || '')).toLowerCase().includes(s);
     };
 
-    const quoteRows = quotes.slice().reverse().filter(matchQ).map(q => {
+    const matchStatus = (q) => statusFilter === 'Todos' || (q.estado || 'Pendiente') === statusFilter;
+    const statusFilters = ['Pendiente', 'Cotizado', 'Cerrado', 'Todos'].map(f => ({
+      key: f, label: f === 'Todos' ? `Todos (${quotes.length})` : `${f} (${quotes.filter(q => (q.estado || 'Pendiente') === f).length})`,
+      bg: statusFilter === f ? '#0a0a0a' : '#fff', color: statusFilter === f ? '#fff' : '#555', border: statusFilter === f ? '#0a0a0a' : '#d8d8d8',
+      onClick: () => this.setStatusFilter(f),
+    }));
+    const quoteRows = quotes.slice().reverse().filter(matchQ).filter(matchStatus).map(q => {
       const cn = this.clientName(q, clients);
       const detalle = q.items ? q.items.map(i => `${i.name} ×${i.qty}`).join(', ') : (q.mensaje || '');
       return {
@@ -971,6 +985,7 @@ class Component extends DCLogic {
       archiveCount: quotes.length,
 
       quoteRows,
+      statusFilters,
       hasQuotes: quoteRows.length > 0,
       noQuotes: quoteRows.length === 0,
       clientRows,
