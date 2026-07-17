@@ -154,6 +154,7 @@
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Detalle</th>
                     <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Monto</th>
                     <th style="text-align:left;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;">Estado</th>
+                    <th style="text-align:right;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -172,7 +173,16 @@
                           <option value="Pendiente">Pendiente</option>
                           <option value="Cotizado">Cotizado</option>
                           <option value="Cerrado">Cerrado</option>
+                          <option value="Papelera">Papelera</option>
                         </select>
+                      </td>
+                      <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
+                        <sc-if value="{{ q.inTrash }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ q.onDeleteForever }}" style="background:#C8102E;border:1px solid #C8102E;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;">Borrar definitivo</button>
+                        </sc-if>
+                        <sc-if value="{{ q.notInTrash }}" hint-placeholder-val="{{ true }}">
+                          <button onClick="{{ q.onTrash }}" style="background:#fff;border:1px solid #d8d8d8;color:#999;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;">Borrar</button>
+                        </sc-if>
                       </td>
                     </tr>
                   </sc-for>
@@ -789,11 +799,22 @@ class Component extends DCLogic {
     await db.collection('quotes').doc(id).update({ estado });
   };
 
+  trashQuote = async (id) => {
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).update({ estadoAnterior: (this.state.quotes.find(q => q.id === id) || {}).estado || 'Pendiente', estado: 'Papelera' });
+  };
+
+  deleteQuoteForever = async (id) => {
+    if (!window.confirm('¿Borrar esta consulta/pedido para siempre? No se puede deshacer.')) return;
+    const db = await this.getDb();
+    await db.collection('quotes').doc(id).delete();
+  };
+
   fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
 
   val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
 
-  estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : '#1a7a3a'); }
+  estadoColor(e) { return e === 'Pendiente' ? '#C8102E' : (e === 'Cotizado' ? '#c47f00' : (e === 'Papelera' ? '#999' : '#1a7a3a')); }
 
   clientName(q, clients) {
     if (q.clientId) {
@@ -843,7 +864,7 @@ class Component extends DCLogic {
     };
 
     const matchStatus = (q) => statusFilter === 'Todos' || (q.estado || 'Pendiente') === statusFilter;
-    const statusFilters = ['Pendiente', 'Cotizado', 'Cerrado', 'Todos'].map(f => ({
+    const statusFilters = ['Pendiente', 'Cotizado', 'Cerrado', 'Papelera', 'Todos'].map(f => ({
       key: f, label: f === 'Todos' ? `Todos (${quotes.length})` : `${f} (${quotes.filter(q => (q.estado || 'Pendiente') === f).length})`,
       bg: statusFilter === f ? '#0a0a0a' : '#fff', color: statusFilter === f ? '#fff' : '#555', border: statusFilter === f ? '#0a0a0a' : '#d8d8d8',
       onClick: () => this.setStatusFilter(f),
@@ -862,6 +883,10 @@ class Component extends DCLogic {
         estado: q.estado,
         estadoColor: this.estadoColor(q.estado),
         onStatus: (e) => this.setStatus(q.id, e.target.value),
+        inTrash: q.estado === 'Papelera',
+        notInTrash: q.estado !== 'Papelera',
+        onTrash: () => this.trashQuote(q.id),
+        onDeleteForever: () => this.deleteQuoteForever(q.id),
       };
     });
 
